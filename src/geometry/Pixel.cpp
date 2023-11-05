@@ -51,3 +51,10 @@ void Pixel::process_crosses(int num_edges){
 	}
 	crosses.clear();
 }
+
+box::box (double lowx, double lowy, double highx, double highy){
+	low[0] = lowx;
+	low[1] = lowy;
+	high[0] = highx;
+	high[1] = highy;
+}

@@ -97,6 +97,26 @@ void MyPolygon::print(bool print_id, bool print_hole){
 	cout<<endl;
 }
 
+MyPolygon *MyPolygon::gen_box(double min_x,double min_y,double max_x,double max_y){
+	MyPolygon *mbr = new MyPolygon();
+	mbr->boundary = new VertexSequence(5);
+	mbr->boundary->p[0].x = min_x;
+	mbr->boundary->p[0].y = min_y;
+	mbr->boundary->p[1].x = max_x;
+	mbr->boundary->p[1].y = min_y;
+	mbr->boundary->p[2].x = max_x;
+	mbr->boundary->p[2].y = max_y;
+	mbr->boundary->p[3].x = min_x;
+	mbr->boundary->p[3].y = max_y;
+	mbr->boundary->p[4].x = min_x;
+	mbr->boundary->p[4].y = min_y;
+	return mbr;
+}
+
+MyPolygon *MyPolygon::gen_box(box &pix){
+	return gen_box(pix.low[0],pix.low[1],pix.high[0],pix.high[1]);
+}
+
 void MyPolygon::clear(){
 	if(boundary){
 		delete boundary;

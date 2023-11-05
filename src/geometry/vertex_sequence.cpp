@@ -1,5 +1,10 @@
 #include "../include/MyPolygon.h"
 
+VertexSequence::VertexSequence(int nv){
+	p = new Point[nv];
+	num_vertices = nv;
+}
+
 box *VertexSequence::getMBR(){
 	box *mbr = new box();
 	for(int i=0;i<num_vertices;i++){

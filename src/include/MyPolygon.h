@@ -29,6 +29,7 @@ public:
 	Point *p = NULL;
 public:
 	VertexSequence(){};
+	VertexSequence(int nv);
 	~VertexSequence();
 	box *getMBR();
 	size_t encode(char *dest);
@@ -51,6 +52,7 @@ class MyRaster{
 public:
     MyRaster(VertexSequence *vs, int epp);
 	void rasterization();
+	void print();
 	~MyRaster();
 };
 
@@ -82,6 +84,30 @@ public:
 	void print_without_head(bool print_hole = false, bool complete_ring = false);
 	MyRaster *get_rastor(){
 		return raster;
+	}
+	static MyPolygon *gen_box(double minx,double miny,double maxx,double maxy);
+	static MyPolygon *gen_box(box &pix);
+};
+
+class MyMultiPolygon{
+	vector<MyPolygon *> polygons;
+public:
+	MyMultiPolygon(){};
+	~MyMultiPolygon();
+	int num_polygons(){
+		return polygons.size();
+	}
+	void print();
+
+	size_t insert_polygon(MyPolygon *p){
+		polygons.push_back(p);
+		return polygons.size();
+	}
+	size_t insert_polygon(vector<MyPolygon *> ps){
+		for(MyPolygon *p:ps){
+			polygons.push_back(p);
+		}
+		return polygons.size();
 	}
 };
 

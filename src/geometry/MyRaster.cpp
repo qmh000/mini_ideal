@@ -262,6 +262,37 @@ void MyRaster::rasterization(){
 	scanline_reandering();
 }
 
+void MyRaster::print(){
+	MyMultiPolygon *inpolys = new MyMultiPolygon();
+	MyMultiPolygon *borderpolys = new MyMultiPolygon();
+	MyMultiPolygon *outpolys = new MyMultiPolygon();
+
+	for(int i=0;i<=dimx;i++){
+		for(int j=0;j<=dimy;j++){
+			MyPolygon *m = MyPolygon::gen_box(*pixels[i][j]);
+			if(pixels[i][j]->status==BORDER){
+				borderpolys->insert_polygon(m);
+			}else if(pixels[i][j]->status==IN){
+				inpolys->insert_polygon(m);
+			}else if(pixels[i][j]->status==OUT){
+				outpolys->insert_polygon(m);
+			}
+		}
+	}
+
+	cout<<"border:"<<endl;
+	borderpolys->print();
+	cout<<"in:"<<endl;
+	inpolys->print();
+	cout<<"out:"<<endl;
+	outpolys->print();
+
+
+	delete borderpolys;
+	delete inpolys;
+	delete outpolys;
+}
+
 MyRaster::~MyRaster(){
 	for(vector<Pixel *> &rows:pixels){
 		for(Pixel *p:rows){
