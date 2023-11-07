@@ -43,49 +43,66 @@ public:
 	}
 };
 
-class edge_range{
+// original
+// class edge_range{
+// public:
+// 	int vstart = 0;
+// 	int vend = 0;
+// 	edge_range(int s, int e){
+// 		vstart = s;
+// 		vend = e;
+// 	}
+// 	int size(){
+// 		return vend-vstart+1;
+// 	}
+// };
+
+// modified
+class Edge_seqs{
 public:
-	int vstart = 0;
-	int vend = 0;
-	edge_range(int s, int e){
-		vstart = s;
-		vend = e;
-	}
-	int size(){
-		return vend-vstart+1;
-	}
+	uint8_t num = 0;
+	pair<uint16_t, uint8_t> *pos;
 };
 
-class Pixel:public box{
-    vector<cross_info> crosses;
-public:
-	unsigned short id[2];
-	PartitionStatus status = OUT;
-	vector<edge_range> edge_ranges;
-	vector<double> intersection_nodes[4];
 
-public:
-	bool is_boundary(){
-		return status == BORDER;
-	}
-	bool is_internal(){
-		return status == IN;
-	}
-	bool is_external(){
-		return status == OUT;
-	}
-	Pixel(){}
-	void enter(double val, Direction d, int vnum);
-	void leave(double val, Direction d, int vnum);
-	void process_crosses(int num_edges);
-};
+// original
+// class Pixel:public box{
+//     vector<cross_info> crosses;
+// public:
+// 	unsigned short id[2];
+// 	PartitionStatus status = OUT;
+// 	vector<edge_range> edge_ranges;
+// 	vector<double> intersection_nodes[4];
 
+// public:
+// 	bool is_boundary(){
+// 		return status == BORDER;
+// 	}
+// 	bool is_internal(){
+// 		return status == IN;
+// 	}
+// 	bool is_external(){
+// 		return status == OUT;
+// 	}
+// 	Pixel(){}
+// 	void enter(double val, Direction d, int vnum);
+// 	void leave(double val, Direction d, int vnum);
+// 	void process_crosses(int num_edges);
+// };
+
+// modified
 class Pixels{
 public:
 	uint8_t *status;
 	uint16_t *pointer;
+	int num_border = 0;
 	Pixels(){}
 	Pixels(int num_vertices);
+
+	void set_status(int id, PartitionStatus status);
+	PartitionStatus show_status(int id);
+	int get_num_pixels();
+	int get_num_border();
 	~Pixels();
 	
 

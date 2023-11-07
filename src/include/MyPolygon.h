@@ -40,8 +40,16 @@ public:
 class MyRaster{
 	box *mbr = NULL;
 	VertexSequence *vs = NULL;
+	// original
 	// vector<vector<Pixel *>> pixels;
+	
+	// modified
 	Pixels *pixels = NULL;
+	double *grid_line = NULL;
+	Edge_seqs *edge_sequences = NULL;
+	Intersection_node *intersection_node_lists = NULL;
+
+
 	double step_x = 0.0;
 	double step_y = 0.0;
 	int dimx = 0;
@@ -49,14 +57,13 @@ class MyRaster{
 	void init_pixels();
 	void evaluate_edges();
 	void scanline_reandering();
-
-	void set_status(int x, int y, PartitionStatus status);
-	PartitionStatus show_status(int x, int y);
-
 public:
     MyRaster(VertexSequence *vs, int epp);
 	void rasterization();
 	void print();
+	int get_id(int x, int y);
+	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
+
 	~MyRaster();
 };
 
@@ -114,6 +121,15 @@ public:
 		return polygons.size();
 	}
 };
+
+class Intersection_node{
+	uint8_t num;
+	double *x;
+
+	Intersection_node(){}
+	Intersection_node(int num_grids);
+};
+
 
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);
 

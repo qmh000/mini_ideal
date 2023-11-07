@@ -65,3 +65,30 @@ box::box (double lowx, double lowy, double highx, double highy){
 	high[0] = highx;
 	high[1] = highy;
 }
+
+void Pixels::set_status(int id, PartitionStatus status){
+	uint8_t st = pixels->status[id / 4];
+	int pos = id % 4 * 2;   //乘2是因为每个status占2bit
+	if(status == OUT){
+		st &= ~((uint8_t)3 << pos);
+	}else if(status == IN){
+		st |= ((uint8_t)3 << pos);
+	}else{
+		st &= ~((uint8_t)1 << pos);
+		st |= ((uint8_t)1 << (pos + 1));
+	}
+}
+
+PartitionStatus Pixels::show_status(int id){
+	uint8_t st = pixels->status[id / 4];
+	int pos = id % 4 * 2;   //乘2是因为每个status占2bit	
+	st &= ((uint8_t)3 << pos);
+	st >>= pos;
+	if(st == 0) return OUT;
+	if(st == 3) return IN;
+	return BORDER;
+}
+
+int Pixels::get_num_pixels(){
+	return (dimx + 1) * (dimy + 1);
+}
