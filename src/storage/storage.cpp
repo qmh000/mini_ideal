@@ -63,7 +63,7 @@ vector<MyPolygon *> load_binary_file(const char *path, query_context &global_ctx
 	infile.open(path, ios::in | ios::binary);
 	size_t num_polygons_infile = 0;
 	infile.seekg(0, infile.end);
-	//seek to the first polygon
+	
 	infile.seekg(-sizeof(size_t), infile.end);
 	infile.read((char *)&num_polygons_infile, sizeof(size_t));
 	assert(num_polygons_infile>0 && "the file should contain at least one polygon");

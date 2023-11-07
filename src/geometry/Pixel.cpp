@@ -52,6 +52,13 @@ void Pixel::process_crosses(int num_edges){
 	crosses.clear();
 }
 
+Pixels::Pixels(int num_pixels){
+	status = new uint8_t[num_pixels / 4 + 1];
+	pointer = new uint16_t[num_pixels];
+}
+
+
+
 box::box (double lowx, double lowy, double highx, double highy){
 	low[0] = lowx;
 	low[1] = lowy;

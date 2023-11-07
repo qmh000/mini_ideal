@@ -57,8 +57,7 @@ public:
 };
 
 class Pixel:public box{
-    	vector<cross_info> crosses;
-
+    vector<cross_info> crosses;
 public:
 	unsigned short id[2];
 	PartitionStatus status = OUT;
@@ -80,5 +79,20 @@ public:
 	void leave(double val, Direction d, int vnum);
 	void process_crosses(int num_edges);
 };
+
+class Pixels{
+public:
+	uint8_t *status;
+	uint16_t *pointer;
+	Pixels(){}
+	Pixels(int num_vertices);
+	~Pixels();
+	
+
+
+};
+
+
+
 
 #endif /* SRC_GEOMETRY_PIXEL_H_ */

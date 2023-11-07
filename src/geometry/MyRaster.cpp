@@ -29,24 +29,31 @@ MyRaster::MyRaster(VertexSequence *vst, int epp){
 	}
 }
 
+// original
+// void MyRaster::init_pixels(){
+// 	assert(mbr);
+// 	const double start_x = mbr->low[0];
+// 	const double start_y = mbr->low[1];
+// 	for(double i=0;i<=dimx;i++){
+// 		vector<Pixel *> v;
+// 		for(double j=0;j<=dimy;j++){
+// 			Pixel *m = new Pixel();
+// 			m->id[0] = i;
+// 			m->id[1] = j;
+// 			m->low[0] = i*step_x+start_x;
+// 			m->high[0] = (i+1.0)*step_x+start_x;
+// 			m->low[1] = j*step_y+start_y;
+// 			m->high[1] = (j+1.0)*step_y+start_y;
+// 			v.push_back(m);
+// 		}
+// 		pixels.push_back(v);
+// 	};
+// }
+
+// modified
 void MyRaster::init_pixels(){
 	assert(mbr);
-	const double start_x = mbr->low[0];
-	const double start_y = mbr->low[1];
-	for(double i=0;i<=dimx;i++){
-		vector<Pixel *> v;
-		for(double j=0;j<=dimy;j++){
-			Pixel *m = new Pixel();
-			m->id[0] = i;
-			m->id[1] = j;
-			m->low[0] = i*step_x+start_x;
-			m->high[0] = (i+1.0)*step_x+start_x;
-			m->low[1] = j*step_y+start_y;
-			m->high[1] = (j+1.0)*step_y+start_y;
-			v.push_back(m);
-		}
-		pixels.push_back(v);
-	};
+	pixels = new Pixels((dimx+1)*(dimy+1));
 }
 
 void MyRaster::evaluate_edges(){
@@ -95,8 +102,13 @@ void MyRaster::evaluate_edges(){
 		assert(cur_starty<=dimy);
 		assert(cur_endy<=dimy);
 
-		pixels[cur_startx][cur_starty]->status = BORDER;
-		pixels[cur_endx][cur_endy]->status = BORDER;
+		// original
+		// pixels[cur_startx][cur_starty]->status = BORDER;
+		// pixels[cur_endx][cur_endy]->status = BORDER;
+
+		//modified
+		set_status(cur_startx, cur_starty, BORDER);
+		set_status(cur_endx, cur_endy, BORDER);
 
 		//in the same pixel
 		if(cur_startx==cur_endx&&cur_starty==cur_endy){
@@ -197,18 +209,6 @@ void MyRaster::evaluate_edges(){
 						}
 					}
 				}
-				// for debugging, should never happen
-				// if(!passed){
-				// 	vs->print();
-				// 	cout<<"dim\t"<<dimx<<" "<<dimy<<endl;
-				// 	printf("val\t%f %f\n",(xval-start_x)/step_x, (yval-start_y)/step_y);
-				// 	cout<<"curxy\t"<<x<<" "<<y<<endl;
-				// 	cout<<"calxy\t"<<cur_x<<" "<<cur_y<<endl;
-				// 	cout<<"xrange\t"<<cur_startx<<" "<<cur_endx<<endl;
-				// 	cout<<"yrange\t"<<cur_starty<<" "<<cur_endy<<endl;
-				// 	printf("xrange_val\t%f %f\n",(x1-start_x)/step_x, (x2-start_x)/step_x);
-				// 	printf("yrange_val\t%f %f\n",(y1-start_y)/step_y, (y2-start_y)/step_y);
-				// }
 				assert(passed);
 			}
 		}
@@ -291,6 +291,31 @@ void MyRaster::print(){
 	delete borderpolys;
 	delete inpolys;
 	delete outpolys;
+}
+
+void MyRaster::set_status(int x, int y, PartitionStatus status){
+	int id = y * dimx + x;
+	uint8_t st = pixels->status[id / 4];
+	int pos = id % 4 * 2;   //乘2是因为每个status占2bit
+	if(status == OUT){
+		st &= ~((uint8_t)3 << pos);
+	}else if(status == IN){
+		st |= ((uint8_t)3 << pos);
+	}else{
+		st &= ~((uint8_t)1 << pos);
+		st |= ((uint8_t)1 << (pos + 1));
+	}
+}
+
+PartitionStatus MyRaster::show_status(int x, int y){
+	int id = y * dimx + x;
+	uint8_t st = pixels->status[id / 4];
+	int pos = id % 4 * 2;   //乘2是因为每个status占2bit	
+	st &= ((uint8_t)3 << pos);
+	st >>= pos;
+	if(st == 0) return OUT;
+	if(st == 3) return IN;
+	return BORDER;
 }
 
 MyRaster::~MyRaster(){

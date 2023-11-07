@@ -27,7 +27,7 @@ class VertexSequence{
 public:
 	int num_vertices = 0;
 	Point *p = NULL;
-public:
+
 	VertexSequence(){};
 	VertexSequence(int nv);
 	~VertexSequence();
@@ -40,7 +40,8 @@ public:
 class MyRaster{
 	box *mbr = NULL;
 	VertexSequence *vs = NULL;
-	vector<vector<Pixel *>> pixels;
+	// vector<vector<Pixel *>> pixels;
+	Pixels *pixels = NULL;
 	double step_x = 0.0;
 	double step_y = 0.0;
 	int dimx = 0;
@@ -48,6 +49,9 @@ class MyRaster{
 	void init_pixels();
 	void evaluate_edges();
 	void scanline_reandering();
+
+	void set_status(int x, int y, PartitionStatus status);
+	PartitionStatus show_status(int x, int y);
 
 public:
     MyRaster(VertexSequence *vs, int epp);
