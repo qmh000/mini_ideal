@@ -60,8 +60,12 @@ public:
 // modified
 class Edge_seqs{
 public:
-	uint8_t num = 0;
 	pair<uint16_t, uint8_t> *pos;
+
+	Edge_seqs(){}
+	Edge_seqs(int num_edge)
+	void init_edge_sequences(int num_edge_seqs);
+	void add_edge(int id, int start, int end);
 };
 
 
@@ -103,6 +107,7 @@ public:
 	PartitionStatus show_status(int id);
 	int get_num_pixels();
 	int get_num_border();
+	void add_edge(int id, int idx);
 	~Pixels();
 	
 

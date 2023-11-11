@@ -46,8 +46,8 @@ class MyRaster{
 	// modified
 	Pixels *pixels = NULL;
 	double *grid_line = NULL;
-	Edge_seqs *edge_sequences = NULL;
-	Intersection_node *intersection_node_lists = NULL;
+	Edge_seqs edge_sequences;
+	Intersection_node intersection_node_lists;
 
 
 	double step_x = 0.0;
@@ -63,6 +63,7 @@ public:
 	void print();
 	int get_id(int x, int y);
 	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
+	void process_intersection(unordered_map<int, vector<double>> edge_intersection);
 
 	~MyRaster();
 };
@@ -123,11 +124,12 @@ public:
 };
 
 class Intersection_node{
-	uint8_t num;
 	double *x;
 
 	Intersection_node(){}
 	Intersection_node(int num_grids);
+	
+	~Intersection_node();
 };
 
 

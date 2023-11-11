@@ -57,6 +57,14 @@ Pixels::Pixels(int num_pixels){
 	pointer = new uint16_t[num_pixels];
 }
 
+int Pixels::get_num_pixels(){
+	return (dimx + 1) * (dimy + 1);
+}
+
+void Pixels::add_edge(int id, int idx){
+	pointer[id] = idx;
+}
+
 
 
 box::box (double lowx, double lowy, double highx, double highy){
@@ -89,6 +97,10 @@ PartitionStatus Pixels::show_status(int id){
 	return BORDER;
 }
 
-int Pixels::get_num_pixels(){
-	return (dimx + 1) * (dimy + 1);
+void Edge_seqs::init_edge_sequences(int num_edge_seqs){
+	edge = new Edge_seqs(num_edge_seqs);
+}
+
+void Edge_seqs::add_edge(int idx, int start, int end){
+	pos[idx] = make_pair(start, end - start  + 1);
 }

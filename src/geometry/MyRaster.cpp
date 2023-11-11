@@ -55,14 +55,13 @@ void MyRaster::init_pixels(){
 	assert(mbr);
 	pixels = new Pixels((dimx+1)*(dimy+1));
 	grid_line = new double[dimy + 1];
-
 }
 
 void MyRaster::evaluate_edges(){
 
 	// modified(add)
 	unordered_map<int, vector<double>> intersect_info;
-	unordered_map<int, vector<cross_info>> edge_info;
+	unordered_map<int, vector<cross_info>> edges_info;
 
 	// normalize
 	assert(mbr);
@@ -133,8 +132,8 @@ void MyRaster::evaluate_edges(){
 
 					// modified
 					// 穿过vertical grid line的edge不用记录
-					edge_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
-					edge_info[get_id(x + 1, cur_starty)].push_back(cross_info(ENTER, i));
+					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(x + 1, cur_starty)].push_back(cross_info(ENTER, i));
 					
 				}
 			}else { // right to left
@@ -144,8 +143,8 @@ void MyRaster::evaluate_edges(){
 					// pixels[x-1][cur_starty]->enter(y1, RIGHT,i);
 
 					// modified
-					edge_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
-					edge_info[get_id(x - 1, cur_starty)].push_back(cross_info(ENTER, i));
+					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(x - 1, cur_starty)].push_back(cross_info(ENTER, i));
 				}
 			}
 		}else if(x1==x2){
@@ -159,8 +158,8 @@ void MyRaster::evaluate_edges(){
 					// modified
 					intersect_info[y + 1].push_back(x1);
 
-					edge_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
-					edge_info[get_id(cur_startx, y + 1)].push_back(cross_info(ENTER, i));
+					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(cur_startx, y + 1)].push_back(cross_info(ENTER, i));
 				}
 			}else { //border[bottom] down
 				for(int y=cur_starty;y>cur_endy;y--){
@@ -171,8 +170,8 @@ void MyRaster::evaluate_edges(){
 					// modified
 					intersect_info[y].push_back(x1);
 
-					edge_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
-					edge_info[get_id(cur_startx, y - 1)].push_back(cross_info(ENTER, i));
+					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(cur_startx, y - 1)].push_back(cross_info(ENTER, i));
 				}
 			}
 		}else{
@@ -213,16 +212,16 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,LEFT,i);
 
 							// modified
-							edge_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
-							edge_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							edges_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 						}else{//right to left
 							// original
 							// pixels[x--][y]->leave(yval,LEFT,i);
 							// pixels[x][y]->enter(yval,RIGHT,i);
 
 							// modified
-							edge_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
-							edge_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							edges_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 						}
 					}
 				}
@@ -252,8 +251,8 @@ void MyRaster::evaluate_edges(){
 							// modified
 							intersect_info[y + 1].push_back(xval);
 
-							edge_info[get_id(x, y ++)].push_back(cross_info(LEAVE, i));
-							edge_info[get_id(x, y)].push_back(cross_info(ENTER, i));							
+							edges_info[get_id(x, y ++)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));							
 						}else{// top down
 							// original
 							// pixels[x][y--]->leave(xval, BOTTOM,i);
@@ -262,8 +261,8 @@ void MyRaster::evaluate_edges(){
 							// modified
 							intersect_info[y].push_back(xval);
 
-							edge_info[get_id(x, y --)].push_back(cross_info(LEAVE, i));
-							edge_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							edges_info[get_id(x, y --)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 						}
 					}
 				}
@@ -284,7 +283,8 @@ void MyRaster::evaluate_edges(){
 	}
 
 	// 初始化edge_sequences;
-	process_crosses(vs->num_vertices);
+	process_crosses(edges_info);
+	process_intersection(intersect_info);
 }
 
 void MyRaster::scanline_reandering(){
@@ -365,66 +365,54 @@ MyRaster::~MyRaster(){
 }
 
 
-void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edge_info){
-	
+void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info){
+	int num_edge_seqs = 0;
+	// 可以写成lambda函数
+	for(auto ei : edges_info){
+		num_edge_seqs += ei.second.size();
+	}
+	edge_sequences.init_edge_sequences(num_edge_seqs);
 
-	
-	
-	for(int i = 0; i < pixels->get_num_pixels(); i ++){
-		vector<cross_info> crosses = edge_info[i];
-		
+	int idx = 0;
+	for(auto ei : edges_info){
+		auto pix = ei.first;
+		auto crosses = ei.second; 
 		if(crosses.size() == 0) return;
 		
 		// 根据crosses.size()，初始化
-
-
 		int start = 0;
 		int end = crosses.size() - 1;
 
 		if(crosses[0].type == LEAVE){
 			assert(crosses[end].type == ENTER);
-
+			edge_sequences.add_edge(idx, 0, crosses[0].edge_id);
+			edge_sequences.add_edge(idx, crosses[end].edge_id, vs->num_vertices - 2);
+			pixels->add_edge(pix, idx);
+			start ++;
+			end --;
 		}
 
-	}
-
-	if(edge_info.size() == 0){
-		return;
-	}
-
-	//very very very very rare cases
-	// if(crosses.size()%2==1){
-	// 	crosses.push_back(cross_info((cross_type)!crosses[crosses.size()-1].type,crosses[crosses.size()-1].edge_id));
-	// }
-
-	// assert(crosses.size()%2==0);
-	int start = 0;
-	int end = edge_info.size() - 1;
-
-	//special case for the first edge
-	if(edge_info[0].type==LEAVE){
-		assert(crosses[end].type==ENTER);
-		edge_ranges.push_back(edge_range(crosses[end].edge_id,num_edges-2));
-		edge_ranges.push_back(edge_range(0,crosses[0].edge_id));
-		start++;
-		end--;
-	}
-
-	for(int i=start;i<=end;i++){
-		assert(crosses[i].type==ENTER);
-		//special case, an ENTER has no pair LEAVE,
-		//happens when one edge crosses the pair
-		if(i==end||crosses[i+1].type==ENTER){
-			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i].edge_id));
-		}else{
-			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i+1].edge_id));
-			i++;
+		for(int i = start; i <= end; i++){
+			assert(crosses[i].type == ENTER);
+			//special case, an ENTER has no pair LEAVE,
+			//happens when one edge crosses the pair
+			if(i == end || crosses[i + 1].type == ENTER){
+				edge_sequences.add_edge(idx, crosses[i].edge_id,crosses[i].edge_id);
+			}else{
+				edge_sequences.add_edge(idx, crosses[i].edge_id,crosses[i+1].edge_id);
+				i++;
+			}
 		}
+		idx ++;
 	}
+}
 
-	// confirm the correctness
-	for(edge_range &r:edge_ranges){
-		assert(r.vstart<=r.vend&&r.vend<num_edges);
+void MyRaster::process_intersection(unordered_map<int, vector<double>> intersection_info){
+	int num_nodes = 0;
+	for(auto i : intersection_info){
+		num_nodes += i.second.size();
 	}
-	crosses.clear();
+	intersection_node_lists.init_intersection_node_lists(num_nodes);
+
+
 }
