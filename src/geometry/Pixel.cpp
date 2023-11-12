@@ -97,10 +97,10 @@ PartitionStatus Pixels::show_status(int id){
 	return BORDER;
 }
 
-void Edge_seqs::init_edge_sequences(int num_edge_seqs){
-	edge = new Edge_seqs(num_edge_seqs);
-}
-
 void Edge_seqs::add_edge(int idx, int start, int end){
 	pos[idx] = make_pair(start, end - start  + 1);
+}
+
+void Edge_seqs::init_edge_sequences(int num_edge_seqs){
+	pos = new pair<uint16_t, uint8_t>[num_edge_seqs];
 }

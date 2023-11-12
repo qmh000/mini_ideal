@@ -63,7 +63,7 @@ public:
 	pair<uint16_t, uint8_t> *pos;
 
 	Edge_seqs(){}
-	Edge_seqs(int num_edge)
+	Edge_seqs(int num_edge);
 	void init_edge_sequences(int num_edge_seqs);
 	void add_edge(int id, int start, int end);
 };

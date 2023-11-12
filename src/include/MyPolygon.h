@@ -45,7 +45,7 @@ class MyRaster{
 	
 	// modified
 	Pixels *pixels = NULL;
-	double *grid_line = NULL;
+	Grid_lines grid_lines;
 	Edge_seqs edge_sequences;
 	Intersection_node intersection_node_lists;
 
@@ -62,6 +62,8 @@ public:
 	void rasterization();
 	void print();
 	int get_id(int x, int y);
+	int get_x(int id);
+	int get_y(int id);
 	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
 	void process_intersection(unordered_map<int, vector<double>> edge_intersection);
 
@@ -124,13 +126,24 @@ public:
 };
 
 class Intersection_node{
-	double *x;
+public:
+	int idx = 0;
+	double *node;
 
 	Intersection_node(){}
-	Intersection_node(int num_grids);
-	
 	~Intersection_node();
+
+	void init_intersection_node(int num_nodes);
+	void add_node(int idx, double x);
 };
+
+class Grid_lines{
+public:
+	uint16_t *horizontal;
+
+	void init_grid_lines(int dimy);
+	int get_num_nodes(int y);
+}
 
 
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);

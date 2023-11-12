@@ -54,7 +54,7 @@ MyRaster::MyRaster(VertexSequence *vst, int epp){
 void MyRaster::init_pixels(){
 	assert(mbr);
 	pixels = new Pixels((dimx+1)*(dimy+1));
-	grid_line = new double[dimy + 1];
+	grid_lines.init_grid_lines(dimy);
 }
 
 void MyRaster::evaluate_edges(){
@@ -282,27 +282,57 @@ void MyRaster::evaluate_edges(){
 		}
 	}
 
-	// 初始化edge_sequences;
+	// 初始化edge_sequences和intersection nodes list;
 	process_crosses(edges_info);
 	process_intersection(intersect_info);
 }
 
+// original
+// void MyRaster::scanline_reandering(){
+// 	for(int y = 1;y < dimy;y ++){
+// 		bool isin = false;
+// 		for(int x = 0; x < dimx; x ++){
+// 			if(pixels[x][y]->status!=BORDER){
+// 				if(isin){
+// 					pixels[x][y]->status = IN;
+// 				}
+// 				continue;
+// 			}
+// 			if(pixels[x][y]->intersection_nodes[BOTTOM].size()%2==1){
+// 				isin = !isin;
+// 			}
+// 		}
+// 	}
+// }
+
+// modified
 void MyRaster::scanline_reandering(){
-	for(int y=1;y<dimy;y++){
+	const double start_x = mbr->low[0];
+	const double start_y = mbr->low[1];
+
+	for(int y = 1; y < dimy; y ++){
 		bool isin = false;
-		for(int x=0;x<dimx;x++){
-			if(pixels[x][y]->status!=BORDER){
+		int pass = 0;
+		for(int x = 0; x < dimx; x ++){
+			if(pixels->show_status(get_id(x, y)) != BORDER){
 				if(isin){
-					pixels[x][y]->status = IN;
+					pixels->set_status(get_id(x, y), IN);
+				}else{
+					pixels->set_status(get_id(x, y), OUT);
 				}
 				continue;
 			}
-			if(pixels[x][y]->intersection_nodes[BOTTOM].size()%2==1){
-				isin = !isin;
+			uint16_t i = grid_lines.horizontal[y], j = grid_lines.horizontal[y + 1];
+			while(i < j && intersection_node_lists.node[i] < start_x + step_x * (x + 1)){
+				pass ++;
+				i ++;
 			}
+			if(pass % 2 == 1) isin = !isin;
+
 		}
 	}
 }
+
 
 void MyRaster::rasterization(){
 
@@ -324,11 +354,11 @@ void MyRaster::print(){
 	for(int i=0;i<=dimx;i++){
 		for(int j=0;j<=dimy;j++){
 			MyPolygon *m = MyPolygon::gen_box(*pixels[i][j]);
-			if(pixels[i][j]->status==BORDER){
+			if(pixels->show_status(get_id(i, j)) == BORDER){
 				borderpolys->insert_polygon(m);
-			}else if(pixels[i][j]->status==IN){
+			}else if(pixels->show_status(get_id(i, j)) == IN){
 				inpolys->insert_polygon(m);
-			}else if(pixels[i][j]->status==OUT){
+			}else if(pixels->show_status(get_id(i, j)) == OUT){
 				outpolys->insert_polygon(m);
 			}
 		}
@@ -349,6 +379,14 @@ void MyRaster::print(){
 
 int MyRaster::get_id(int x, int y){
 	return y * dimx + x;
+}
+
+int MyRaster::get_x(int id){
+	return id % dimx;
+}
+
+int MyRaster::get_y(int id){
+	return id / dimx;
 }
 
 MyRaster::~MyRaster(){
@@ -374,9 +412,9 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 	edge_sequences.init_edge_sequences(num_edge_seqs);
 
 	int idx = 0;
-	for(auto ei : edges_info){
-		auto pix = ei.first;
-		auto crosses = ei.second; 
+	for(auto info : edges_info){
+		auto pix = info.first;
+		auto crosses = info.second; 
 		if(crosses.size() == 0) return;
 		
 		// 根据crosses.size()，初始化
@@ -412,7 +450,18 @@ void MyRaster::process_intersection(unordered_map<int, vector<double>> intersect
 	for(auto i : intersection_info){
 		num_nodes += i.second.size();
 	}
-	intersection_node_lists.init_intersection_node_lists(num_nodes);
+	intersection_node_lists.init_intersection_node(num_nodes);
+	
+	int idx = 0;
+	for(auto info : intersection_info){
+		auto pix = info.first;
+		auto nodes = info.second;
 
+		grid_lines.horizontal[get_x(pix)] = idx;
 
+		for(auto node : nodes){
+			intersection_node_lists.add_node(idx, node);
+			idx ++;
+		}
+	}
 }
