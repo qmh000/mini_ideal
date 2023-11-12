@@ -1,71 +1,70 @@
 #include "../include/Pixel.h"
 
-void Pixel::enter(double val, Direction d, int vnum){
-	intersection_nodes[d].push_back(val);
-	crosses.push_back(cross_info(ENTER,vnum));
-}
+// void Pixel::enter(double val, Direction d, int vnum){
+// 	intersection_nodes[d].push_back(val);
+// 	crosses.push_back(cross_info(ENTER,vnum));
+// }
 
-void Pixel::leave(double val, Direction d, int vnum){
-	intersection_nodes[d].push_back(val);
-	crosses.push_back(cross_info(LEAVE,vnum));
-}
+// void Pixel::leave(double val, Direction d, int vnum){
+// 	intersection_nodes[d].push_back(val);
+// 	crosses.push_back(cross_info(LEAVE,vnum));
+// }
 
-void Pixel::process_crosses(int num_edges){
-	if(crosses.size()==0){
-		return;
-	}
+// void Pixel::process_crosses(int num_edges){
+// 	if(crosses.size()==0){
+// 		return;
+// 	}
 
-	//very very very very rare cases
-	if(crosses.size()%2==1){
-		crosses.push_back(cross_info((cross_type)!crosses[crosses.size()-1].type,crosses[crosses.size()-1].edge_id));
-	}
+// 	//very very very very rare cases
+// 	if(crosses.size()%2==1){
+// 		crosses.push_back(cross_info((cross_type)!crosses[crosses.size()-1].type,crosses[crosses.size()-1].edge_id));
+// 	}
 
-	assert(crosses.size()%2==0);
-	int start = 0;
-	int end = crosses.size()-1;
+// 	assert(crosses.size()%2==0);
+// 	int start = 0;
+// 	int end = crosses.size()-1;
 
-	//special case for the first edge
-	if(crosses[0].type==LEAVE){
-		assert(crosses[end].type==ENTER);
-		edge_ranges.push_back(edge_range(crosses[end].edge_id,num_edges-2));
-		edge_ranges.push_back(edge_range(0,crosses[0].edge_id));
-		start++;
-		end--;
-	}
+// 	//special case for the first edge
+// 	if(crosses[0].type==LEAVE){
+// 		assert(crosses[end].type==ENTER);
+// 		edge_ranges.push_back(edge_range(crosses[end].edge_id,num_edges-2));
+// 		edge_ranges.push_back(edge_range(0,crosses[0].edge_id));
+// 		start++;
+// 		end--;
+// 	}
 
-	for(int i=start;i<=end;i++){
-		assert(crosses[i].type==ENTER);
-		//special case, an ENTER has no pair LEAVE,
-		//happens when one edge crosses the pair
-		if(i==end||crosses[i+1].type==ENTER){
-			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i].edge_id));
-		}else{
-			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i+1].edge_id));
-			i++;
-		}
-	}
+// 	for(int i=start;i<=end;i++){
+// 		assert(crosses[i].type==ENTER);
+// 		//special case, an ENTER has no pair LEAVE,
+// 		//happens when one edge crosses the pair
+// 		if(i==end||crosses[i+1].type==ENTER){
+// 			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i].edge_id));
+// 		}else{
+// 			edge_ranges.push_back(edge_range(crosses[i].edge_id,crosses[i+1].edge_id));
+// 			i++;
+// 		}
+// 	}
 
-	// confirm the correctness
-	for(edge_range &r:edge_ranges){
-		assert(r.vstart<=r.vend&&r.vend<num_edges);
-	}
-	crosses.clear();
-}
+// 	// confirm the correctness
+// 	for(edge_range &r:edge_ranges){
+// 		assert(r.vstart<=r.vend&&r.vend<num_edges);
+// 	}
+// 	crosses.clear();
+// }
 
 Pixels::Pixels(int num_pixels){
 	status = new uint8_t[num_pixels / 4 + 1];
 	pointer = new uint16_t[num_pixels];
 }
 
-int Pixels::get_num_pixels(){
-	return (dimx + 1) * (dimy + 1);
+Pixels::~Pixels(){
+	delete status;
+	delete pointer;
 }
 
 void Pixels::add_edge(int id, int idx){
 	pointer[id] = idx;
 }
-
-
 
 box::box (double lowx, double lowy, double highx, double highy){
 	low[0] = lowx;
@@ -74,12 +73,12 @@ box::box (double lowx, double lowy, double highx, double highy){
 	high[1] = highy;
 }
 
-void Pixels::set_status(int id, PartitionStatus status){
-	uint8_t st = pixels->status[id / 4];
+void Pixels::set_status(int id, PartitionStatus state){
+	uint8_t st = status[id / 4];
 	int pos = id % 4 * 2;   //乘2是因为每个status占2bit
-	if(status == OUT){
+	if(state == OUT){
 		st &= ~((uint8_t)3 << pos);
-	}else if(status == IN){
+	}else if(state == IN){
 		st |= ((uint8_t)3 << pos);
 	}else{
 		st &= ~((uint8_t)1 << pos);
@@ -88,7 +87,7 @@ void Pixels::set_status(int id, PartitionStatus status){
 }
 
 PartitionStatus Pixels::show_status(int id){
-	uint8_t st = pixels->status[id / 4];
+	uint8_t st = status[id / 4];
 	int pos = id % 4 * 2;   //乘2是因为每个status占2bit	
 	st &= ((uint8_t)3 << pos);
 	st >>= pos;
@@ -103,4 +102,8 @@ void Edge_seqs::add_edge(int idx, int start, int end){
 
 void Edge_seqs::init_edge_sequences(int num_edge_seqs){
 	pos = new pair<uint16_t, uint8_t>[num_edge_seqs];
+}
+
+Edge_seqs::~Edge_seqs(){
+	delete pos;
 }

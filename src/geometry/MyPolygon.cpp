@@ -113,7 +113,7 @@ MyPolygon *MyPolygon::gen_box(double min_x,double min_y,double max_x,double max_
 	return mbr;
 }
 
-MyPolygon *MyPolygon::gen_box(box &pix){
+MyPolygon *MyPolygon::gen_box(box pix){
 	return gen_box(pix.low[0],pix.low[1],pix.high[0],pix.high[1]);
 }
 

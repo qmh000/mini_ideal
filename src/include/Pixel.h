@@ -63,7 +63,7 @@ public:
 	pair<uint16_t, uint8_t> *pos;
 
 	Edge_seqs(){}
-	Edge_seqs(int num_edge);
+	~Edge_seqs();
 	void init_edge_sequences(int num_edge_seqs);
 	void add_edge(int id, int start, int end);
 };
@@ -102,13 +102,13 @@ public:
 	int num_border = 0;
 	Pixels(){}
 	Pixels(int num_vertices);
-
+	~Pixels();
 	void set_status(int id, PartitionStatus status);
 	PartitionStatus show_status(int id);
 	int get_num_pixels();
 	int get_num_border();
 	void add_edge(int id, int idx);
-	~Pixels();
+	
 	
 
 

@@ -115,7 +115,6 @@ void MyRaster::evaluate_edges(){
 		//modified
 		pixels->set_status(get_id(cur_startx, cur_starty), BORDER);
 		pixels->set_status(get_id(cur_endx, cur_endy), BORDER);
-		pixels->num_border += 2;
 
 		//in the same pixel
 		if(cur_startx==cur_endx&&cur_starty==cur_endy){
@@ -271,15 +270,22 @@ void MyRaster::evaluate_edges(){
 		}
 	}
 
-	for(vector<Pixel *> &rows:pixels){
-		for(Pixel *p:rows){
-			for(int i=0;i<4;i++){
-				if(p->intersection_nodes[i].size()>0){
-					p->status = BORDER;
-					break;
-				}
-			}
-		}
+	// original
+	// for(vector<Pixel *> &rows:pixels){
+	// 	for(Pixel *p:rows){
+	// 		for(int i=0;i<4;i++){
+	// 			if(p->intersection_nodes[i].size()>0){
+	// 				p->status = BORDER;
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// modified
+	for(auto info : edges_info){
+		auto pix = info.first;
+		pixels->set_status(pix, BORDER);
 	}
 
 	// 初始化edge_sequences和intersection nodes list;
@@ -353,7 +359,7 @@ void MyRaster::print(){
 
 	for(int i=0;i<=dimx;i++){
 		for(int j=0;j<=dimy;j++){
-			MyPolygon *m = MyPolygon::gen_box(*pixels[i][j]);
+			MyPolygon *m = MyPolygon::gen_box(get_pixel_box(i, j));
 			if(pixels->show_status(get_id(i, j)) == BORDER){
 				borderpolys->insert_polygon(m);
 			}else if(pixels->show_status(get_id(i, j)) == IN){
@@ -377,6 +383,18 @@ void MyRaster::print(){
 	delete outpolys;
 }
 
+box MyRaster::get_pixel_box(int x, int y){
+	const double start_x = mbr->low[0];
+	const double start_y = mbr->low[1];
+
+	double lowx = start_x + x * step_x;
+	double lowy = start_y + y * step_y;
+	double highx = start_x + (x + 1) * step_x;
+	double highy = start_y + (y + 1) * step_y;
+
+	return box(lowx, lowy, highx, highy);
+}
+
 int MyRaster::get_id(int x, int y){
 	return y * dimx + x;
 }
@@ -390,16 +408,17 @@ int MyRaster::get_y(int id){
 }
 
 MyRaster::~MyRaster(){
-	for(vector<Pixel *> &rows:pixels){
-		for(Pixel *p:rows){
-			delete p;
-		}
-		rows.clear();
-	}
-	pixels.clear();
-
+	// original
+	// for(vector<Pixel *> &rows:pixels){
+	// 	for(Pixel *p:rows){
+	// 		delete p;
+	// 	}
+	// 	rows.clear();
+	// }
+	// pixels.clear();
+	
 	// modified
-	delete grid_line;
+	delete pixels;
 }
 
 

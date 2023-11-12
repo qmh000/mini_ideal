@@ -23,6 +23,27 @@ typedef struct PolygonMeta_{
 	box mbr; // the bounding boxes
 } PolygonMeta;
 
+class Intersection_node{
+public:
+	int idx = 0;
+	double *node;
+
+	Intersection_node(){}
+	~Intersection_node();
+	void init_intersection_node(int num_nodes);
+	void add_node(int idx, double x);
+};
+
+class Grid_lines{
+public:
+	uint16_t *horizontal;
+	
+	Grid_lines(){}
+	~Grid_lines();
+	void init_grid_lines(int dimy);
+	int get_num_nodes(int y);
+};
+
 class VertexSequence{
 public:
 	int num_vertices = 0;
@@ -64,6 +85,7 @@ public:
 	int get_id(int x, int y);
 	int get_x(int id);
 	int get_y(int id);
+	box get_pixel_box(int x, int y);
 	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
 	void process_intersection(unordered_map<int, vector<double>> edge_intersection);
 
@@ -100,7 +122,7 @@ public:
 		return raster;
 	}
 	static MyPolygon *gen_box(double minx,double miny,double maxx,double maxy);
-	static MyPolygon *gen_box(box &pix);
+	static MyPolygon *gen_box(box pix);
 };
 
 class MyMultiPolygon{
@@ -124,26 +146,6 @@ public:
 		return polygons.size();
 	}
 };
-
-class Intersection_node{
-public:
-	int idx = 0;
-	double *node;
-
-	Intersection_node(){}
-	~Intersection_node();
-
-	void init_intersection_node(int num_nodes);
-	void add_node(int idx, double x);
-};
-
-class Grid_lines{
-public:
-	uint16_t *horizontal;
-
-	void init_grid_lines(int dimy);
-	int get_num_nodes(int y);
-}
 
 
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);
