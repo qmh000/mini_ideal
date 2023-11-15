@@ -54,10 +54,14 @@ MyRaster::MyRaster(VertexSequence *vst, int epp){
 void MyRaster::init_pixels(){
 	assert(mbr);
 	pixels = new Pixels((dimx+1)*(dimy+1));
+	// pixels->init_status((dimx+1)*(dimy+1) / 4 + 1);
+	pixels->init_status((dimx+1)*(dimy+1));
 	grid_lines.init_grid_lines(dimy);
 }
 
 void MyRaster::evaluate_edges(){
+
+	set<pair<int, int>> check_count;
 
 	// modified(add)
 	unordered_map<int, vector<double>> intersect_info;
@@ -113,8 +117,12 @@ void MyRaster::evaluate_edges(){
 		// pixels[cur_endx][cur_endy]->status = BORDER;
 
 		//modified
+
 		pixels->set_status(get_id(cur_startx, cur_starty), BORDER);
 		pixels->set_status(get_id(cur_endx, cur_endy), BORDER);
+
+		check_count.insert(make_pair(cur_startx, cur_starty));
+		check_count.insert(make_pair(cur_endx, cur_endy));
 
 		//in the same pixel
 		if(cur_startx==cur_endx&&cur_starty==cur_endy){
@@ -133,7 +141,8 @@ void MyRaster::evaluate_edges(){
 					// 穿过vertical grid line的edge不用记录
 					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(x + 1, cur_starty)].push_back(cross_info(ENTER, i));
-					
+					// pixels->set_status(get_id(x, cur_starty), BORDER);
+					// pixels->set_status(get_id(x + 1, cur_starty), BORDER);
 				}
 			}else { // right to left
 				for(int x=cur_startx;x>cur_endx;x--){
@@ -144,6 +153,8 @@ void MyRaster::evaluate_edges(){
 					// modified
 					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(x - 1, cur_starty)].push_back(cross_info(ENTER, i));
+					// pixels->set_status(get_id(x, cur_starty), BORDER);
+					// pixels->set_status(get_id(x - 1, cur_starty), BORDER);
 				}
 			}
 		}else if(x1==x2){
@@ -159,6 +170,8 @@ void MyRaster::evaluate_edges(){
 
 					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(cur_startx, y + 1)].push_back(cross_info(ENTER, i));
+					// pixels->set_status(get_id(cur_startx, y), BORDER);
+					// pixels->set_status(get_id(cur_startx, y + 1), BORDER);
 				}
 			}else { //border[bottom] down
 				for(int y=cur_starty;y>cur_endy;y--){
@@ -171,6 +184,8 @@ void MyRaster::evaluate_edges(){
 
 					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(cur_startx, y - 1)].push_back(cross_info(ENTER, i));
+					// pixels->set_status(get_id(cur_startx, y), BORDER);
+					// pixels->set_status(get_id(cur_startx, y - 1), BORDER);
 				}
 			}
 		}else{
@@ -211,16 +226,20 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,LEFT,i);
 
 							// modified
+							// pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							// pixels->set_status(get_id(x, y), BORDER);
 						}else{//right to left
 							// original
 							// pixels[x--][y]->leave(yval,LEFT,i);
 							// pixels[x][y]->enter(yval,RIGHT,i);
 
 							// modified
+							// pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							// pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
 				}
@@ -250,8 +269,10 @@ void MyRaster::evaluate_edges(){
 							// modified
 							intersect_info[y + 1].push_back(xval);
 
+							// pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x, y ++)].push_back(cross_info(LEAVE, i));
-							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));							
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));			
+							// pixels->set_status(get_id(x, y), BORDER);				
 						}else{// top down
 							// original
 							// pixels[x][y--]->leave(xval, BOTTOM,i);
@@ -260,8 +281,10 @@ void MyRaster::evaluate_edges(){
 							// modified
 							intersect_info[y].push_back(xval);
 
+							// pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x, y --)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
+							// pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
 				}
@@ -283,14 +306,19 @@ void MyRaster::evaluate_edges(){
 	// }
 
 	// modified
-	for(auto info : edges_info){
-		auto pix = info.first;
-		pixels->set_status(pix, BORDER);
-	}
+	// for(auto info : edges_info){
+	// 	auto pix = info.first;
+	// 	pixels->set_status(pix, BORDER);
+	// }
 
 	// 初始化edge_sequences和intersection nodes list;
 	process_crosses(edges_info);
 	process_intersection(intersect_info);
+	
+	cout << check_count.size() << endl;
+	for(auto i : check_count){
+		cout << i.first << ", " << i.second << endl;
+	}
 }
 
 // original
@@ -370,13 +398,12 @@ void MyRaster::print(){
 		}
 	}
 
-	cout<<"border:"<<endl;
+	cout<<"border:" << borderpolys->num_polygons() <<endl;
 	borderpolys->print();
-	cout<<"in:"<<endl;
+	cout<<"in:"<< inpolys->num_polygons() << endl;
 	inpolys->print();
-	cout<<"out:"<<endl;
+	cout<<"out:"<< outpolys->num_polygons() << endl;
 	outpolys->print();
-
 
 	delete borderpolys;
 	delete inpolys;
@@ -396,7 +423,7 @@ box MyRaster::get_pixel_box(int x, int y){
 }
 
 int MyRaster::get_id(int x, int y){
-	return y * dimx + x;
+	return y * (dimx+1) + x;
 }
 
 int MyRaster::get_x(int id){

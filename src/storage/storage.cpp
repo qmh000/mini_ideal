@@ -30,7 +30,7 @@ void *load_unit(void *arg){
 			while(off<poly_size){
 				MyPolygon *poly = new MyPolygon();
 				off += poly->decode(buffer+off);
-				if(poly->get_num_vertices() >= 3 && tryluck(ctx->sample_rate)){
+				if(poly->get_num_vertices() >= 3){
 					polygons.push_back(poly);
 					poly->getMBB();
 				}else{
@@ -124,4 +124,31 @@ vector<MyPolygon *> load_binary_file(const char *path, query_context &global_ctx
 	}
 	logt("loaded %ld polygons", start, polygons.size());
 	return polygons;
+}
+
+MyPolygon *load_binary_file_single(const char *path, query_context ctx, int idx)
+{
+	ifstream infile;
+	infile.open(path, ios::in | ios::binary);
+
+	size_t num_polygons_infile;
+	infile.seekg(-sizeof(size_t), infile.end);
+	infile.read((char *)&num_polygons_infile, sizeof(size_t));
+	assert(idx < num_polygons_infile && "the idx must smaller than the polygon number ");
+
+	PolygonMeta pmeta;
+	infile.seekg(-sizeof(size_t) - sizeof(PolygonMeta) * (num_polygons_infile - idx), infile.end);
+	infile.read((char *)&pmeta, sizeof(PolygonMeta));
+
+	char *buffer = new char[pmeta.size];
+
+	infile.seekg(pmeta.offset, infile.beg);
+	infile.read(buffer, pmeta.size);
+
+	MyPolygon *poly = new MyPolygon();
+	poly->decode(buffer);
+
+	delete[] buffer;
+	infile.close();
+	return poly;
 }

@@ -53,7 +53,8 @@
 // }
 
 Pixels::Pixels(int num_pixels){
-	status = new uint8_t[num_pixels / 4 + 1];
+	// status = new uint8_t[num_pixels / 4 + 1];
+	status = new int[num_pixels];
 	pointer = new uint16_t[num_pixels];
 }
 
@@ -73,26 +74,36 @@ box::box (double lowx, double lowy, double highx, double highy){
 	high[1] = highy;
 }
 
+// void Pixels::set_status(int id, PartitionStatus state){
+// 	int pos = id % 4 * 2;   //乘2是因为每个status占2bit
+// 	if(state == OUT){
+// 		status[id / 4] &= ~((uint8_t)3 << pos);
+// 	}else if(state == IN){
+// 		status[id / 4] |= ((uint8_t)3 << pos);
+// 	}else{
+// 		status[id / 4] &= ~((uint8_t)1 << pos);
+// 		status[id / 4] |= ((uint8_t)1 << (pos + 1));
+// 	}
+// }
+
 void Pixels::set_status(int id, PartitionStatus state){
-	uint8_t st = status[id / 4];
-	int pos = id % 4 * 2;   //乘2是因为每个status占2bit
-	if(state == OUT){
-		st &= ~((uint8_t)3 << pos);
-	}else if(state == IN){
-		st |= ((uint8_t)3 << pos);
-	}else{
-		st &= ~((uint8_t)1 << pos);
-		st |= ((uint8_t)1 << (pos + 1));
-	}
+	status[id] = state;
 }
 
+// PartitionStatus Pixels::show_status(int id){
+// 	uint8_t st = status[id / 4];
+// 	int pos = id % 4 * 2;   //乘2是因为每个status占2bit	
+// 	st &= ((uint8_t)3 << pos);
+// 	st >>= pos;
+// 	if(st == 0) return OUT;
+// 	if(st == 3) return IN;
+// 	return BORDER;
+// }
+
 PartitionStatus Pixels::show_status(int id){
-	uint8_t st = status[id / 4];
-	int pos = id % 4 * 2;   //乘2是因为每个status占2bit	
-	st &= ((uint8_t)3 << pos);
-	st >>= pos;
+	int st = status[id];
 	if(st == 0) return OUT;
-	if(st == 3) return IN;
+	if(st == 2) return IN;
 	return BORDER;
 }
 

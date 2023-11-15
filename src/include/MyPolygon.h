@@ -149,5 +149,6 @@ public:
 
 
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);
+MyPolygon *load_binary_file_single(const char *path, query_context ctx, int idx);
 
 #endif /* SRC_MYPOLYGON_H_ */
