@@ -15,13 +15,14 @@ int main(){
 	// 		return 0;
 	// 	}
 	// }
-
-	
-	MyPolygon *source = load_binary_file_single("/home/qmh/mini_ideal/src/has_child.idl",ctx,0);
+	int input;
+	cin >> input;
+	MyPolygon *source = load_binary_file_single("/home/qmh/mini_ideal/src/has_child.idl",ctx,input);
 
 	cout << source->boundary->num_vertices << endl;
 
 	source->rasterization(100);
+	// source->print();
 	source->get_rastor()->print();
 
 	return 0;

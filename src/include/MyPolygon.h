@@ -87,7 +87,7 @@ public:
 	int get_y(int id);
 	box get_pixel_box(int x, int y);
 	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
-	void process_intersection(unordered_map<int, vector<double>> edge_intersection);
+	void process_intersection(map<int, vector<double>> edge_intersection);
 
 	~MyRaster();
 };

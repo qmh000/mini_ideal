@@ -64,7 +64,7 @@ void MyRaster::evaluate_edges(){
 	set<pair<int, int>> check_count;
 
 	// modified(add)
-	unordered_map<int, vector<double>> intersect_info;
+	map<int, vector<double>> intersect_info;
 	unordered_map<int, vector<cross_info>> edges_info;
 
 	// normalize
@@ -346,7 +346,6 @@ void MyRaster::scanline_reandering(){
 
 	for(int y = 1; y < dimy; y ++){
 		bool isin = false;
-		int pass = 0;
 		for(int x = 0; x < dimx; x ++){
 			if(pixels->show_status(get_id(x, y)) != BORDER){
 				if(isin){
@@ -356,12 +355,15 @@ void MyRaster::scanline_reandering(){
 				}
 				continue;
 			}
+			int pass = 0;
 			uint16_t i = grid_lines.horizontal[y], j = grid_lines.horizontal[y + 1];
-			while(i < j && intersection_node_lists.node[i] < start_x + step_x * (x + 1)){
+			if(y == 3) printf("i = %d, j = %d\n", i , j);
+			while(i < j && intersection_node_lists.node[i] <= start_x + step_x * (x + 1)){
 				pass ++;
 				i ++;
 			}
-			if(pass % 2 == 1) isin = !isin;
+			if(pass % 2 == 1) isin = true;
+			else isin = false;
 
 		}
 	}
@@ -385,9 +387,12 @@ void MyRaster::print(){
 	MyMultiPolygon *borderpolys = new MyMultiPolygon();
 	MyMultiPolygon *outpolys = new MyMultiPolygon();
 
+	MyMultiPolygon *allpolys = new MyMultiPolygon();
+
 	for(int i=0;i<=dimx;i++){
 		for(int j=0;j<=dimy;j++){
 			MyPolygon *m = MyPolygon::gen_box(get_pixel_box(i, j));
+			allpolys->insert_polygon(m);
 			if(pixels->show_status(get_id(i, j)) == BORDER){
 				borderpolys->insert_polygon(m);
 			}else if(pixels->show_status(get_id(i, j)) == IN){
@@ -404,6 +409,9 @@ void MyRaster::print(){
 	inpolys->print();
 	cout<<"out:"<< outpolys->num_polygons() << endl;
 	outpolys->print();
+	cout << endl;
+	allpolys->print();
+
 
 	delete borderpolys;
 	delete inpolys;
@@ -427,11 +435,11 @@ int MyRaster::get_id(int x, int y){
 }
 
 int MyRaster::get_x(int id){
-	return id % dimx;
+	return id % (dimx+1);
 }
 
 int MyRaster::get_y(int id){
-	return id / dimx;
+	return id / (dimx+1);
 }
 
 MyRaster::~MyRaster(){
@@ -491,7 +499,7 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 	}
 }
 
-void MyRaster::process_intersection(unordered_map<int, vector<double>> intersection_info){
+void MyRaster::process_intersection(map<int, vector<double>> intersection_info){
 	int num_nodes = 0;
 	for(auto i : intersection_info){
 		num_nodes += i.second.size();
@@ -500,14 +508,18 @@ void MyRaster::process_intersection(unordered_map<int, vector<double>> intersect
 	
 	int idx = 0;
 	for(auto info : intersection_info){
-		auto pix = info.first;
+		auto h = info.first;
 		auto nodes = info.second;
+		
+		sort(nodes.begin(), nodes.end());
 
-		grid_lines.horizontal[get_x(pix)] = idx;
+		grid_lines.horizontal[h] = idx;
 
 		for(auto node : nodes){
 			intersection_node_lists.add_node(idx, node);
 			idx ++;
 		}
 	}
+	grid_lines.horizontal[dimy] = idx;
+
 }
