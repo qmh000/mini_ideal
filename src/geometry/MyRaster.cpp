@@ -471,6 +471,12 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 		auto crosses = info.second; 
 		if(crosses.size() == 0) return;
 		
+		if(crosses.size() % 2 == 1){
+			crosses.push_back(cross_info((cross_type)!crosses[crosses.size()-1].type, crosses[crosses.size()-1].edge_id));
+		}
+		
+		assert(crosses.size()%2==0);
+
 		// 根据crosses.size()，初始化
 		int start = 0;
 		int end = crosses.size() - 1;
