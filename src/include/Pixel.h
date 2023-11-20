@@ -97,8 +97,8 @@ public:
 // modified
 class Pixels{
 public:
-	// uint8_t *status;
-	int *status;
+	uint8_t *status;
+	// int *status;
 	uint16_t *pointer;
 	int num_border = 0;
 	Pixels(){}

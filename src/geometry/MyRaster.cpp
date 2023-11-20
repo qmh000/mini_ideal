@@ -54,8 +54,8 @@ MyRaster::MyRaster(VertexSequence *vst, int epp){
 void MyRaster::init_pixels(){
 	assert(mbr);
 	pixels = new Pixels((dimx+1)*(dimy+1));
-	// pixels->init_status((dimx+1)*(dimy+1) / 4 + 1);
-	pixels->init_status((dimx+1)*(dimy+1));
+	pixels->init_status((dimx+1)*(dimy+1) / 4 + 1);
+	// pixels->init_status((dimx+1)*(dimy+1));
 	grid_lines.init_grid_lines(dimy);
 }
 
