@@ -57,17 +57,6 @@ public:
 // 	}
 // };
 
-// modified
-class Edge_seqs{
-public:
-	pair<uint16_t, uint8_t> *pos;
-
-	Edge_seqs(){}
-	~Edge_seqs();
-	void init_edge_sequences(int num_edge_seqs);
-	void add_edge(int id, int start, int end);
-};
-
 
 // original
 // class Pixel:public box{
@@ -100,7 +89,10 @@ public:
 	uint8_t *status;
 	// int *status;
 	uint16_t *pointer;
+	pair<uint16_t, uint8_t> *edge_sequences;
 	int num_border = 0;
+
+	
 	Pixels(){}
 	Pixels(int num_vertices);
 	~Pixels();
@@ -110,10 +102,11 @@ public:
 	int get_num_pixels();
 	int get_num_border();
 	int get_num_sequences(int id);
-	void add_edge(int id, int idx);
+	void add_edge_offset(int id, int idx);
 	void process_pixels_null(int x, int y);
 	
-
+	void init_edge_sequences(int num_edge_seqs);
+	void add_edge(int id, int start, int end);
 
 };
 

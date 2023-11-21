@@ -1,14 +1,24 @@
 #include "../include/MyPolygon.h"
 
-void Grid_lines::init_grid_lines(int dimy){
-    horizontal = new uint16_t[dimy + 1];
-    memset(horizontal, 0, sizeof(uint16_t) * (dimy + 1));
+void Grid_lines::init_grid_lines(int len){
+    offset = new uint16_t[len + 1];
+    memset(offset, 0, sizeof(uint16_t) * (len + 1));
 }
 
 int Grid_lines::get_num_nodes(int y){
-    return horizontal[y + 1] - horizontal[y];
+    return offset[y + 1] - offset[y];
+}
+
+void Grid_lines::init_intersection_node(int num_nodes){
+    intersection_nodes = new double[num_nodes];
+}
+
+void Grid_lines::add_node(int idx, double x){
+    intersection_nodes[idx] = x;
 }
 
 Grid_lines::~Grid_lines(){
-    delete horizontal;
+    delete offset;
+    delete intersection_nodes;
 }
+

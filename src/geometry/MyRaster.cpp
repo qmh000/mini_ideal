@@ -56,7 +56,7 @@ void MyRaster::init_pixels(){
 	pixels = new Pixels((dimx+1)*(dimy+1));
 	pixels->init_status((dimx+1)*(dimy+1) / 4 + 1);
 	// pixels->init_status((dimx+1)*(dimy+1));
-	grid_lines.init_grid_lines(dimy);
+	horizontal.init_grid_lines(dimy);
 }
 
 void MyRaster::evaluate_edges(){
@@ -347,9 +347,9 @@ void MyRaster::scanline_reandering(){
 				continue;
 			}
 			int pass = 0;
-			uint16_t i = grid_lines.horizontal[y], j = grid_lines.horizontal[y + 1];
+			uint16_t i = horizontal.offset[y], j = horizontal.offset[y + 1];
 			if(y == 3) printf("i = %d, j = %d\n", i , j);
-			while(i < j && intersection_node_lists.node[i] <= start_x + step_x * (x + 1)){
+			while(i < j && horizontal.intersection_nodes[i] <= start_x + step_x * (x + 1)){
 				pass ++;
 				i ++;
 			}
@@ -450,11 +450,11 @@ MyRaster::~MyRaster(){
 
 void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info){
 	int num_edge_seqs = 0;
-	// 可以写成lambda函数
+	// 可以写成lambda表达式
 	for(auto ei : edges_info){
 		num_edge_seqs += ei.second.size();
 	}
-	edge_sequences.init_edge_sequences(num_edge_seqs);
+	pixels->init_edge_sequences(num_edge_seqs);
 
 	int idx = 0;
 	for(auto info : edges_info){
@@ -471,12 +471,12 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 		// 根据crosses.size()，初始化
 		int start = 0;
 		int end = crosses.size() - 1;
+		pixels->add_edge_offset(pix, idx);
 
 		if(crosses[0].type == LEAVE){
 			assert(crosses[end].type == ENTER);
-			edge_sequences.add_edge(idx, 0, crosses[0].edge_id);
-			edge_sequences.add_edge(idx, crosses[end].edge_id, vs->num_vertices - 2);
-			pixels->add_edge(pix, idx);
+			pixels->add_edge(idx ++, 0, crosses[0].edge_id);
+			pixels->add_edge(idx ++, crosses[end].edge_id, vs->num_vertices - 2);
 			start ++;
 			end --;
 		}
@@ -486,13 +486,12 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 			//special case, an ENTER has no pair LEAVE,
 			//happens when one edge crosses the pair
 			if(i == end || crosses[i + 1].type == ENTER){
-				edge_sequences.add_edge(idx, crosses[i].edge_id,crosses[i].edge_id);
+				pixels->add_edge(idx ++, crosses[i].edge_id,crosses[i].edge_id);
 			}else{
-				edge_sequences.add_edge(idx, crosses[i].edge_id,crosses[i+1].edge_id);
+				pixels->add_edge(idx ++, crosses[i].edge_id,crosses[i+1].edge_id);
 				i++;
 			}
 		}
-		idx ++;
 	}
 }
 
@@ -501,7 +500,7 @@ void MyRaster::process_intersection(map<int, vector<double>> intersection_info){
 	for(auto i : intersection_info){
 		num_nodes += i.second.size();
 	}
-	intersection_node_lists.init_intersection_node(num_nodes);
+	horizontal.init_intersection_node(num_nodes);
 	
 	int idx = 0;
 	for(auto info : intersection_info){
@@ -510,13 +509,13 @@ void MyRaster::process_intersection(map<int, vector<double>> intersection_info){
 		
 		sort(nodes.begin(), nodes.end());
 
-		grid_lines.horizontal[h] = idx;
+		horizontal.offset[h] = idx;
 
 		for(auto node : nodes){
-			intersection_node_lists.add_node(idx, node);
+			horizontal.add_node(idx, node);
 			idx ++;
 		}
 	}
-	grid_lines.horizontal[dimy] = idx;
+	horizontal.offset[dimy] = idx;
 
 }

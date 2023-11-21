@@ -23,25 +23,18 @@ typedef struct PolygonMeta_{
 	box mbr; // the bounding boxes
 } PolygonMeta;
 
-class Intersection_node{
-public:
-	int idx = 0;
-	double *node;
-
-	Intersection_node(){}
-	~Intersection_node();
-	void init_intersection_node(int num_nodes);
-	void add_node(int idx, double x);
-};
-
 class Grid_lines{
 public:
-	uint16_t *horizontal;
-	
+	uint16_t *offset;
+	double *intersection_nodes;
+
 	Grid_lines(){}
 	~Grid_lines();
 	void init_grid_lines(int dimy);
 	int get_num_nodes(int y);
+
+	void init_intersection_node(int num_nodes);
+	void add_node(int idx, double x);
 };
 
 class VertexSequence{
@@ -66,10 +59,8 @@ class MyRaster{
 	
 	// modified
 	Pixels *pixels = NULL;
-	Grid_lines grid_lines;
-	Edge_seqs edge_sequences;
-	Intersection_node intersection_node_lists;
-
+	Grid_lines horizontal;
+	Grid_lines vertical;
 
 	double step_x = 0.0;
 	double step_y = 0.0;

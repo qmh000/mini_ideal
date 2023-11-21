@@ -61,9 +61,10 @@ Pixels::Pixels(int num_pixels){
 Pixels::~Pixels(){
 	delete status;
 	delete pointer;
+	delete edge_sequences;
 }
 
-void Pixels::add_edge(int id, int idx){
+void Pixels::add_edge_offset(int id, int idx){
 	pointer[id] = idx;
 }
 
@@ -120,14 +121,10 @@ void Pixels::process_pixels_null(int x, int y){
 	}
 }
 
-void Edge_seqs::add_edge(int idx, int start, int end){
-	pos[idx] = make_pair(start, end - start  + 1);
+void Pixels::add_edge(int idx, int start, int end){
+	edge_sequences[idx] = make_pair(start, end - start  + 1);
 }
 
-void Edge_seqs::init_edge_sequences(int num_edge_seqs){
-	pos = new pair<uint16_t, uint8_t>[num_edge_seqs];
-}
-
-Edge_seqs::~Edge_seqs(){
-	delete pos;
+void Pixels::init_edge_sequences(int num_edge_seqs){
+	edge_sequences = new pair<uint16_t, uint8_t>[num_edge_seqs];
 }
