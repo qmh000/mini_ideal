@@ -109,8 +109,9 @@ public:
 	PartitionStatus show_status(int id);
 	int get_num_pixels();
 	int get_num_border();
+	int get_num_sequences(int id);
 	void add_edge(int id, int idx);
-	
+	void process_pixels_null(int x, int y);
 	
 
 

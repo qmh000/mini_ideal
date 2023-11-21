@@ -107,6 +107,19 @@ PartitionStatus Pixels::show_status(int id){
 // 	return BORDER;
 // }
 
+int Pixels::get_num_sequences(int id){
+	if(show_status(id) != BORDER) return 0;
+	else return pointer[id + 1] - pointer[id];
+}
+
+void Pixels::process_pixels_null(int x, int y){
+	for(int i = (x+1)*(y+1)-1; i >= 0; i --){
+		if(show_status(i) != BORDER){
+			pointer[i] = pointer[i + 1]; 
+		}
+	}
+}
+
 void Edge_seqs::add_edge(int idx, int start, int end){
 	pos[idx] = make_pair(start, end - start  + 1);
 }

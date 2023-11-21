@@ -22,7 +22,7 @@ int main(){
 	cout << source->boundary->num_vertices << endl;
 
 	source->rasterization(100);
-	// source->print();
+	source->print();
 	source->get_rastor()->print();
 
 	return 0;
