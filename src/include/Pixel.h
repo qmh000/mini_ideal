@@ -96,7 +96,7 @@ public:
 	Pixels(){}
 	Pixels(int num_vertices);
 	~Pixels();
-	void init_status(int size){memset(status, 0, size * sizeof(int));}
+	void  init_status(int size){memset(status, 0, size);}
 	void set_status(int id, PartitionStatus status);
 	PartitionStatus show_status(int id);
 	int get_num_pixels();

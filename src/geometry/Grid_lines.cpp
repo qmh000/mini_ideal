@@ -1,8 +1,8 @@
 #include "../include/MyPolygon.h"
 
 void Grid_lines::init_grid_lines(int len){
-    offset = new uint16_t[len + 1];
-    memset(offset, 0, sizeof(uint16_t) * (len + 1));
+    offset = new uint16_t[len];
+    memset(offset, 0, sizeof(uint16_t) * (len));
 }
 
 int Grid_lines::get_num_nodes(int y){

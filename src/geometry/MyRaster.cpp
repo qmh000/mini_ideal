@@ -56,7 +56,7 @@ void MyRaster::init_pixels(){
 	pixels = new Pixels((dimx+1)*(dimy+1));
 	pixels->init_status((dimx+1)*(dimy+1) / 4 + 1);
 	// pixels->init_status((dimx+1)*(dimy+1));
-	horizontal.init_grid_lines(dimy);
+	horizontal.init_grid_lines(dimy + 1);
 }
 
 void MyRaster::evaluate_edges(){
@@ -287,6 +287,7 @@ void MyRaster::evaluate_edges(){
 		}
 	}
 
+
 	// original
 	// for(vector<Pixel *> &rows:pixels){
 	// 	for(Pixel *p:rows){
@@ -348,7 +349,6 @@ void MyRaster::scanline_reandering(){
 			}
 			int pass = 0;
 			uint16_t i = horizontal.offset[y], j = horizontal.offset[y + 1];
-			if(y == 3) printf("i = %d, j = %d\n", i , j);
 			while(i < j && horizontal.intersection_nodes[i] <= start_x + step_x * (x + 1)){
 				pass ++;
 				i ++;
