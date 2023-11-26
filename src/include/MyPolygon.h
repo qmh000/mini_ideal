@@ -28,13 +28,15 @@ public:
 	uint16_t *offset;
 	double *intersection_nodes;
 
+	size_t num_crosses = 0;
+
 	Grid_lines(){}
 	~Grid_lines();
 	void init_grid_lines(int dimy);
 	int get_num_nodes(int y);
-
 	void init_intersection_node(int num_nodes);
 	void add_node(int idx, double x);
+
 };
 
 class VertexSequence{
@@ -73,12 +75,22 @@ public:
     MyRaster(VertexSequence *vs, int epp);
 	void rasterization();
 	void print();
+	size_t get_num_pixels();
+	size_t get_num_pixels(PartitionStatus status);
+	size_t get_num_crosses();
+	int get_offset_x(double xval);
+	int get_offset_y(double yval);
+	double get_double_x(int x);
+	double get_double_y(int y);
 	int get_id(int x, int y);
 	int get_x(int id);
 	int get_y(int id);
+	int count_intersection_nodes(Point &p);
 	box get_pixel_box(int x, int y);
+	Pixels* get_pixels(){return pixels;}
+	int get_pixel_id(Point &p){return get_id(get_offset_x(p.x), get_offset_y(p.y));}
 	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
-	void process_intersection(map<int, vector<double>> edge_intersection);
+	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
 
 	~MyRaster();
 };
@@ -97,7 +109,22 @@ public:
     }
     ~MyPolygon();
     void clear();
-    size_t decode(char *source);
+	/*
+	 * some query functions
+	 */
+	bool contain(Point &p, query_context *ctx, bool profile = true);
+	/*
+	 * some utility functions
+	 */
+	void print(bool print_id=true, bool print_hole=false);
+	void print_without_head(bool print_hole = false, bool complete_ring = false);
+	/*
+	 * for filtering
+	 */
+	box *getMBB();
+	void rasterization(int vertex_per_raster);
+
+	size_t decode(char *source);
     size_t encode(char *target);
     inline int get_num_vertices(){
 		if(!boundary){
@@ -105,13 +132,16 @@ public:
 		}
 		return boundary->num_vertices;
 	}
-    box *getMBB();
-    void rasterization(int vertex_per_raster);
-	void print(bool print_id=true, bool print_hole=false);
-	void print_without_head(bool print_hole = false, bool complete_ring = false);
 	MyRaster *get_rastor(){
 		return raster;
 	}
+	size_t get_num_pixels(){
+		if(raster){
+			return raster->get_num_pixels();
+		}
+		return 0;
+	}
+	
 	static MyPolygon *gen_box(double minx,double miny,double maxx,double maxy);
 	static MyPolygon *gen_box(box pix);
 };
@@ -138,7 +168,10 @@ public:
 	}
 };
 
+// utility functions
+void preprocess(query_context *gctx);
 
+// storage related functions
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);
 MyPolygon *load_binary_file_single(const char *path, query_context ctx, int idx);
 

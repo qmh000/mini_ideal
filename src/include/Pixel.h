@@ -13,6 +13,7 @@ public:
 
 	box(){}
 	box (double lowx, double lowy, double highx, double highy);
+	bool contain(Point &p);
 };
 
 enum PartitionStatus{
@@ -90,8 +91,6 @@ public:
 	// int *status;
 	uint16_t *pointer;
 	pair<uint16_t, uint8_t> *edge_sequences;
-	int num_border = 0;
-
 	
 	Pixels(){}
 	Pixels(int num_vertices);
@@ -99,18 +98,54 @@ public:
 	void  init_status(int size){memset(status, 0, size);}
 	void set_status(int id, PartitionStatus status);
 	PartitionStatus show_status(int id);
-	int get_num_pixels();
-	int get_num_border();
 	int get_num_sequences(int id);
 	void add_edge_offset(int id, int idx);
 	void process_pixels_null(int x, int y);
 	
 	void init_edge_sequences(int num_edge_seqs);
 	void add_edge(int id, int start, int end);
-
+	pair<uint16_t, uint8_t> get_edge(int idx){return edge_sequences[idx];}
 };
 
+/*
+ * the node for RTree
+ *
+ * */
 
+class RTNode:public box{
+public:
+	vector<RTNode *> children;
+	void *node_element = NULL;
+
+	RTNode(){};
+	bool is_leaf(){
+		return children.size()==0;
+	}
+	int node_count(){
+		int count = 0;
+		node_count(count);
+		return count;
+	}
+	void node_count(int &count){
+		count++;
+		for(RTNode *px:children){
+			assert(px!=this);
+			px->node_count(count);
+		}
+	}
+	bool validate(){
+		if(is_leaf()){
+			return node_element != NULL;
+		}else{
+			for(RTNode *ch:children){
+				if(!ch->validate()){
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+};
 
 
 #endif /* SRC_GEOMETRY_PIXEL_H_ */

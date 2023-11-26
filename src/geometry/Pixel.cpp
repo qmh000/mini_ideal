@@ -128,3 +128,10 @@ void Pixels::add_edge(int idx, int start, int end){
 void Pixels::init_edge_sequences(int num_edge_seqs){
 	edge_sequences = new pair<uint16_t, uint8_t>[num_edge_seqs];
 }
+
+bool box::contain(Point &p){
+	return p.x>=low[0]&&
+		   p.x<=high[0]&&
+		   p.y>=low[1]&&
+		   p.y<=high[1];
+}
