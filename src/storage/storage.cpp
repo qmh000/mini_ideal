@@ -152,3 +152,21 @@ MyPolygon *load_binary_file_single(const char *path, query_context ctx, int idx)
 	infile.close();
 	return poly;
 }
+
+size_t load_points_from_path(const char *path, Point **points)
+{
+	size_t fsize = file_size(path);
+	if (fsize <= 0)
+	{
+		log("%s is empty", path);
+		exit(0);
+	}
+	size_t target_num = fsize / sizeof(Point);
+	log_refresh("start loading %ld points", target_num);
+
+	*points = new Point[target_num];
+	ifstream infile(path, ios::in | ios::binary);
+	infile.read((char *)*points, fsize);
+	infile.close();
+	return target_num;
+}

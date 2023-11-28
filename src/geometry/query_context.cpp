@@ -87,11 +87,11 @@ void query_context::report_latency(int num_v, double lt){
 	}
 }
 
-// void query_context::load_points(){
-// 	struct timeval start = get_cur_time();
-// 	target_num = load_points_from_path(target_path.c_str(), &points);
-// 	logt("loaded %ld points", start,target_num);
-// }
+void query_context::load_points(){
+	struct timeval start = get_cur_time();
+	target_num = load_points_from_path(target_path.c_str(), &points);
+	logt("loaded %ld points", start,target_num);
+}
 
 void query_context::report_progress(int eval_batch){
 	if(++query_count==eval_batch){

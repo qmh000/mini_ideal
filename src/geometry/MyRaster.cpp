@@ -480,6 +480,25 @@ size_t MyRaster::get_num_crosses(){
 	return horizontal.num_crosses + vertical.num_crosses;
 }
 
+int MyRaster::get_num_border_edge(){
+	int num = 0;
+	// for(vector<Pixel *> &rows:pixels){
+	// 	for(Pixel *p:rows){
+	// 		num += p->num_edges_covered();
+	// 	}
+	// }
+	for(int i = 0; i < get_num_pixels(); i ++){
+		num += pixels->edge_sequences[i].second;
+	}
+	return num;
+}
+
+int MyRaster::get_num_sequences(int id){
+	if(pixels->show_status(id) != BORDER) return 0;
+	if(id + 1 >= get_num_pixels()) return get_num_pixels() - pixels->pointer[id];
+	return pixels->pointer[id + 1] - pixels->pointer[id];
+}
+
 size_t MyRaster::get_num_pixels(){
 	return (dimx+1)*(dimy+1);
 }
@@ -487,12 +506,17 @@ size_t MyRaster::get_num_pixels(){
 size_t MyRaster::get_num_pixels(PartitionStatus status){
 	size_t num = 0;
 	 
-	for(vector<Pixel *> &rows:pixels){
-		for(Pixel *p:rows){
-			if(p->status==status){
-				num++;
-			}
-		}
+	// for(vector<Pixel *> &rows:pixels){
+	// 	for(Pixel *p:rows){
+	// 		if(p->status==status){
+	// 			num++;
+	// 		}
+	// 	}
+	// }
+
+	for(int i = 0; i < get_num_pixels(); i ++){
+		if(pixels->show_status(i) == status) 
+			num ++;
 	}
 	return num;
 }
@@ -520,7 +544,7 @@ MyRaster::~MyRaster(){
 	// pixels.clear();
 	
 	// modified
-	delete pixels;
+	// delete pixels;
 }
 
 
@@ -562,9 +586,9 @@ void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info
 			//special case, an ENTER has no pair LEAVE,
 			//happens when one edge crosses the pair
 			if(i == end || crosses[i + 1].type == ENTER){
-				pixels->add_edge(idx ++, crosses[i].edge_id,crosses[i].edge_id);
+				pixels->add_edge(idx ++, crosses[i].edge_id, crosses[i].edge_id);
 			}else{
-				pixels->add_edge(idx ++, crosses[i].edge_id,crosses[i+1].edge_id);
+				pixels->add_edge(idx ++, crosses[i].edge_id, crosses[i+1].edge_id);
 				i++;
 			}
 		}

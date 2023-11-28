@@ -78,6 +78,8 @@ public:
 	size_t get_num_pixels();
 	size_t get_num_pixels(PartitionStatus status);
 	size_t get_num_crosses();
+	int get_num_border_edge();
+	int get_num_sequences(int id);
 	int get_offset_x(double xval);
 	int get_offset_y(double yval);
 	double get_double_x(int x);
@@ -174,5 +176,6 @@ void preprocess(query_context *gctx);
 // storage related functions
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);
 MyPolygon *load_binary_file_single(const char *path, query_context ctx, int idx);
+size_t load_points_from_path(const char *path, Point **points);
 
 #endif /* SRC_MYPOLYGON_H_ */

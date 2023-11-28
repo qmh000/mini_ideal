@@ -49,7 +49,7 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 		// 	}
 		// 	edge_count += rg.size();
 		// }
-        for(int e = 0; e < pix->get_num_sequences(target); e ++){
+        for(int e = 0; e < raster->get_num_sequences(target); e ++){
             auto edge = pix->get_edge(target);
             auto pos = edge.first;
             for(int k = 0; k < edge.second; k ++){
@@ -120,5 +120,7 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 	// 	}
 	// 	return contained;
 	// }
+	cout << "Error!" << endl;
+	return false;
 }
 

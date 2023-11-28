@@ -13,7 +13,7 @@
 using namespace std;
 
 MyPolygon::~MyPolygon(){
-	clear();
+	// clear();
 }
 
 void MyPolygon::rasterization(int vpr){
@@ -21,12 +21,12 @@ void MyPolygon::rasterization(int vpr){
 	if(raster){
 		return;
 	}
-	// pthread_mutex_lock(&ideal_partition_lock);
+	pthread_mutex_lock(&ideal_partition_lock);
 	if(raster==NULL){
-		raster = new MyRaster(boundary,vpr);
-		raster->rasterization();
+		raster = new MyRaster(boundary, vpr);
+		// raster->rasterization();
 	}
-	// pthread_mutex_unlock(&ideal_partition_lock);
+	pthread_mutex_unlock(&ideal_partition_lock);
 }
 
 size_t MyPolygon::decode(char *source){

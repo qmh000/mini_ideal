@@ -98,7 +98,6 @@ public:
 	void  init_status(int size){memset(status, 0, size);}
 	void set_status(int id, PartitionStatus status);
 	PartitionStatus show_status(int id);
-	int get_num_sequences(int id);
 	void add_edge_offset(int id, int idx);
 	void process_pixels_null(int x, int y);
 	
