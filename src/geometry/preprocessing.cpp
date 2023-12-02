@@ -67,26 +67,26 @@ void process_rasterization(query_context *gctx){
 	}
 
 	// //collect partitioning status
-	// size_t num_partitions = 0;
-	// size_t num_crosses = 0;
-	// size_t num_border_partitions = 0;
-	// size_t num_edges = 0;
-	// for(MyPolygon *poly:polygons){
-	// 	num_partitions += poly->get_rastor()->get_num_pixels();
-	// 	num_crosses += poly->get_rastor()->get_num_crosses();
-	// 	num_border_partitions += poly->get_rastor()->get_num_pixels(BORDER);
-	// 	num_edges += poly->get_rastor()->get_num_border_edge();
-	// }
-	// logt("IDEALized %d polygons with (%ld)%ld average pixels %.2f average crosses per pixel %.2f edges per pixel", start,
-	// 		polygons.size(),
-	// 		num_border_partitions/polygons.size(),
-	// 		num_partitions/polygons.size(),
-	// 		1.0*num_crosses/num_border_partitions,
-	// 		1.0*num_edges/num_border_partitions);
+	size_t num_partitions = 0;
+	size_t num_crosses = 0;
+	size_t num_border_partitions = 0;
+	size_t num_edges = 0;
+	for(MyPolygon *poly:polygons){
+		num_partitions += poly->get_rastor()->get_num_pixels();
+		num_crosses += poly->get_rastor()->get_num_crosses();
+		num_border_partitions += poly->get_rastor()->get_num_pixels(BORDER);
+		num_edges += poly->get_rastor()->get_num_border_edge();
+	}
+	logt("IDEALized %d polygons with (%ld)%ld average pixels %.2f average crosses per pixel %.2f edges per pixel", start,
+			polygons.size(),
+			num_border_partitions/polygons.size(),
+			num_partitions/polygons.size(),
+			1.0*num_crosses/num_border_partitions,
+			1.0*num_edges/num_border_partitions);
 
-	// gctx->index = 0;
-	// gctx->query_count = 0;
-	// gctx->target_num = former;
+	gctx->index = 0;
+	gctx->query_count = 0;
+	gctx->target_num = former;
 }
 
 // the entry function

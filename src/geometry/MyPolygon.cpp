@@ -24,7 +24,7 @@ void MyPolygon::rasterization(int vpr){
 	pthread_mutex_lock(&ideal_partition_lock);
 	if(raster==NULL){
 		raster = new MyRaster(boundary, vpr);
-		// raster->rasterization();
+		raster->rasterization();
 	}
 	pthread_mutex_unlock(&ideal_partition_lock);
 }

@@ -4,12 +4,12 @@
 
 int main(){
 	query_context ctx;
-	vector<MyPolygon *> source = load_binary_file("/home/qmh/mini_ideal/src/has_child.idl",ctx);
+	vector<MyPolygon *> source = load_binary_file("/home/qmh/data/has_child.idl",ctx);
 	
 	for(int i = 0; i < source.size(); i ++){
 		source[i]->rasterization(100);
-		source[i]->print();
-		source[i]->get_rastor()->print();
+		// source[i]->print();
+		// source[i]->get_rastor()->print();
 	}
     cout << "rasterization finished!" << endl;
 

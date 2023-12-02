@@ -109,7 +109,7 @@ PartitionStatus Pixels::show_status(int id){
 // }
 
 void Pixels::process_pixels_null(int x, int y){
-	for(int i = (x+1)*(y+1)-1; i >= 0; i --){
+	for(int i = (x+1)*(y+1)-2; i >= 0; i --){
 		if(show_status(i) != BORDER){
 			pointer[i] = pointer[i + 1]; 
 		}

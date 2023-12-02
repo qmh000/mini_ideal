@@ -18,7 +18,7 @@ void Grid_lines::add_node(int idx, double x){
 }
 
 Grid_lines::~Grid_lines(){
-    delete offset;
-    delete intersection_nodes;
+    delete []offset;
+    delete []intersection_nodes;
 }
 

@@ -61,34 +61,36 @@ int main(int argc, char** argv) {
 
 	preprocess(&global_ctx);
 
-	// timeval start = get_cur_time();
-	// for(MyPolygon *p:global_ctx.source_polygons){
-	// 	tree.Insert(p->getMBB()->low, p->getMBB()->high, p);
-	// }
-	// logt("building R-Tree with %d nodes", start, global_ctx.source_polygons.size());
+	return 0;
 
-	// // read all the points
-	// global_ctx.load_points();
+	timeval start = get_cur_time();
+	for(MyPolygon *p:global_ctx.source_polygons){
+		tree.Insert(p->getMBB()->low, p->getMBB()->high, p);
+	}
+	logt("building R-Tree with %d nodes", start, global_ctx.source_polygons.size());
+
+	// read all the points
+	global_ctx.load_points();
 
 
-	// start = get_cur_time();
-	// pthread_t threads[global_ctx.num_threads];
-	// query_context ctx[global_ctx.num_threads];
-	// for(int i=0;i<global_ctx.num_threads;i++){
-	// 	ctx[i] = global_ctx;
-	// 	ctx[i].thread_id = i;
-	// 	ctx[i].global_ctx = &global_ctx;
-	// }
-	// for(int i=0;i<global_ctx.num_threads;i++){
-	// 	pthread_create(&threads[i], NULL, query, (void *)&ctx[i]);
-	// }
+	start = get_cur_time();
+	pthread_t threads[global_ctx.num_threads];
+	query_context ctx[global_ctx.num_threads];
+	for(int i=0;i<global_ctx.num_threads;i++){
+		ctx[i] = global_ctx;
+		ctx[i].thread_id = i;
+		ctx[i].global_ctx = &global_ctx;
+	}
+	for(int i=0;i<global_ctx.num_threads;i++){
+		pthread_create(&threads[i], NULL, query, (void *)&ctx[i]);
+	}
 
-	// for(int i = 0; i < global_ctx.num_threads; i++ ){
-	// 	void *status;
-	// 	pthread_join(threads[i], &status);
-	// }
-	// global_ctx.print_stats();
-	// logt("total query",start);
+	for(int i = 0; i < global_ctx.num_threads; i++ ){
+		void *status;
+		pthread_join(threads[i], &status);
+	}
+	global_ctx.print_stats();
+	logt("total query",start);
 
 
 	return 0;

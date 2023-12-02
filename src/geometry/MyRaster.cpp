@@ -225,7 +225,7 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,LEFT,i);
 
 							// modified
-							horizontal_intersect_info[x + 1].push_back(yval);
+							vertical_intersect_info[x + 1].push_back(yval);
 
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
@@ -237,7 +237,7 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,RIGHT,i);
 
 							// modified
-							horizontal_intersect_info[x].push_back(yval);
+							vertical_intersect_info[x].push_back(yval);
 
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
@@ -488,7 +488,9 @@ int MyRaster::get_num_border_edge(){
 	// 	}
 	// }
 	for(int i = 0; i < get_num_pixels(); i ++){
-		num += pixels->edge_sequences[i].second;
+		if(pixels->show_status(i) == BORDER){
+			num += pixels->edge_sequences[i].second;
+		}
 	}
 	return num;
 }
@@ -636,7 +638,7 @@ void MyRaster::process_intersection(map<int, vector<double>> intersection_info, 
 				idx ++;
 			}
 		}
-		vertical.offset[dimy] = idx;		
+		vertical.offset[dimx] = idx;		
 	}
 
 }
