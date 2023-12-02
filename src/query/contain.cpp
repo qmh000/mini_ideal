@@ -61,8 +61,6 @@ int main(int argc, char** argv) {
 
 	preprocess(&global_ctx);
 
-	return 0;
-
 	timeval start = get_cur_time();
 	for(MyPolygon *p:global_ctx.source_polygons){
 		tree.Insert(p->getMBB()->low, p->getMBB()->high, p);
@@ -81,6 +79,7 @@ int main(int argc, char** argv) {
 		ctx[i].thread_id = i;
 		ctx[i].global_ctx = &global_ctx;
 	}
+	
 	for(int i=0;i<global_ctx.num_threads;i++){
 		pthread_create(&threads[i], NULL, query, (void *)&ctx[i]);
 	}
@@ -98,25 +97,17 @@ int main(int argc, char** argv) {
 
 // int main(int argc, char** argv) {
 // 	query_context ctx;
-// 	query_context *ctx1;
 
-// 	MyPolygon *source_polygons = load_binary_file_single("/home/qmh/data/has_child.idl", ctx, 0);
+// 	MyPolygon *poly = load_binary_file_single("/home/qmh/data/has_child.idl", ctx, 0);
 
-// 	source_polygons->getMBB();
-// 	source_polygons->rasterization(100);
+// 	poly->rasterization(100);
 
-// 	// source_polygons->print();
+// 	cout << poly->get_rastor()->get_num_pixels() << endl;
+// 	cout << poly->get_rastor()->get_num_crosses() << endl;
+// 	cout <<	poly->get_rastor()->get_num_pixels(BORDER) << endl;
+// 	cout << poly->get_rastor()->get_num_border_edge() << endl;
 
-// 	double inputx, inputy;
-// 	scanf("%lf,%lf", &inputx, &inputy);
-
-// 	Point point(inputy, inputx);
-
-// 	if(source_polygons->contain(point, ctx1, false)){
-// 		cout << "Yes" << endl;
-// 	}else{
-// 	 	cout << "No" << endl;
-// 	}
+// 	cout << poly->boundary->num_vertices << endl;
 
 // 	return 0;
 // }

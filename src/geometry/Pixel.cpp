@@ -55,7 +55,7 @@
 Pixels::Pixels(int num_pixels){
 	status = new uint8_t[num_pixels / 4 + 1];
 	// status = new int[num_pixels];
-	pointer = new uint16_t[num_pixels];
+	pointer = new uint16_t[num_pixels + 1];    //这里+1是为了让pointer[num_pixels] = len_edge_sequences，这样对于最后一个pointer就不用特判了
 }
 
 Pixels::~Pixels(){
@@ -109,7 +109,8 @@ PartitionStatus Pixels::show_status(int id){
 // }
 
 void Pixels::process_pixels_null(int x, int y){
-	for(int i = (x+1)*(y+1)-2; i >= 0; i --){
+	pointer[(x+1)*(y+1)] = len_edge_sequences;
+	for(int i = (x+1)*(y+1)-1; i >= 0; i --){
 		if(show_status(i) != BORDER){
 			pointer[i] = pointer[i + 1]; 
 		}
@@ -121,6 +122,7 @@ void Pixels::add_edge(int idx, int start, int end){
 }
 
 void Pixels::init_edge_sequences(int num_edge_seqs){
+	len_edge_sequences = num_edge_seqs;
 	edge_sequences = new pair<uint16_t, uint8_t>[num_edge_seqs];
 }
 

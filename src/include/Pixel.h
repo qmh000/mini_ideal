@@ -91,6 +91,8 @@ public:
 	// int *status;
 	uint16_t *pointer;
 	pair<uint16_t, uint8_t> *edge_sequences;
+
+	int len_edge_sequences = 0;
 	
 	Pixels(){}
 	Pixels(int num_vertices);
@@ -102,7 +104,7 @@ public:
 	void process_pixels_null(int x, int y);
 	
 	void init_edge_sequences(int num_edge_seqs);
-	void add_edge(int id, int start, int end);
+	void add_edge(int idx, int start, int end);
 	pair<uint16_t, uint8_t> get_edge(int idx){return edge_sequences[idx];}
 };
 

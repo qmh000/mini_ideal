@@ -64,7 +64,7 @@ void MyRaster::evaluate_edges(){
 	// modified(add)
 	map<int, vector<double>> horizontal_intersect_info;
 	map<int, vector<double>> vertical_intersect_info;
-	unordered_map<int, vector<cross_info>> edges_info;
+	map<int, vector<cross_info>> edges_info;
 
 	// normalize
 	assert(mbr);
@@ -434,7 +434,9 @@ int MyRaster::count_intersection_nodes(Point &p){
 	// 	}
 	// }
 	int x = get_x(pix_id) + 1;
-	uint16_t i = vertical.offset[x], j = vertical.offset[x + 1];
+	uint16_t i = vertical.offset[x], j;
+	if(x < dimx) j = vertical.offset[x + 1];
+	else j = vertical.num_crosses;
 	while(i < j && vertical.intersection_nodes[i] <= p.y){
 		count ++;
 		i ++;
@@ -477,27 +479,22 @@ double MyRaster::get_double_y(int y){
 }
 
 size_t MyRaster::get_num_crosses(){
-	return horizontal.num_crosses + vertical.num_crosses;
+	// *2是为了match原始IDEAL
+	return (horizontal.num_crosses + vertical.num_crosses) * 2;
 }
 
 int MyRaster::get_num_border_edge(){
-	int num = 0;
+	// int num = 0;
 	// for(vector<Pixel *> &rows:pixels){
 	// 	for(Pixel *p:rows){
 	// 		num += p->num_edges_covered();
 	// 	}
 	// }
-	for(int i = 0; i < get_num_pixels(); i ++){
-		if(pixels->show_status(i) == BORDER){
-			num += pixels->edge_sequences[i].second;
-		}
-	}
-	return num;
+	return vs->num_vertices;
 }
 
-int MyRaster::get_num_sequences(int id){
+uint16_t MyRaster::get_num_sequences(int id){
 	if(pixels->show_status(id) != BORDER) return 0;
-	if(id + 1 >= get_num_pixels()) return get_num_pixels() - pixels->pointer[id];
 	return pixels->pointer[id + 1] - pixels->pointer[id];
 }
 
@@ -550,7 +547,7 @@ MyRaster::~MyRaster(){
 }
 
 
-void MyRaster::process_crosses(unordered_map<int, vector<cross_info>> edges_info){
+void MyRaster::process_crosses(map<int, vector<cross_info>> edges_info){
 	int num_edge_seqs = 0;
 	// 可以写成lambda表达式
 	for(auto ei : edges_info){

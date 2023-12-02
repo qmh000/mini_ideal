@@ -79,7 +79,7 @@ public:
 	size_t get_num_pixels(PartitionStatus status);
 	size_t get_num_crosses();
 	int get_num_border_edge();
-	int get_num_sequences(int id);
+	uint16_t get_num_sequences(int id);
 	int get_offset_x(double xval);
 	int get_offset_y(double yval);
 	double get_double_x(int x);
@@ -91,7 +91,7 @@ public:
 	box get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
 	int get_pixel_id(Point &p){return get_id(get_offset_x(p.x), get_offset_y(p.y));}
-	void process_crosses(unordered_map<int, vector<cross_info>> edge_info);
+	void process_crosses(map<int, vector<cross_info>> edge_info);
 	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
 
 	~MyRaster();
