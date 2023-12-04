@@ -7,9 +7,12 @@ int main(){
 	vector<MyPolygon *> source = load_binary_file("/home/qmh/data/has_child.idl",ctx);
 	
 	for(int i = 0; i < source.size(); i ++){
-		source[i]->rasterization(100);
-		// source[i]->print();
-		// source[i]->get_rastor()->print();
+		auto p = source[i];
+		if(p->boundary->num_vertices<10000){
+			p->rasterization(100);
+			p->print();
+			p->get_rastor()->print();
+		}
 	}
     cout << "rasterization finished!" << endl;
 

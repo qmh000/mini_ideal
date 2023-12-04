@@ -320,6 +320,17 @@ void MyRaster::evaluate_edges(){
 	process_intersection(horizontal_intersect_info, "horizontal");
 	process_intersection(vertical_intersect_info, "vertical");
 	pixels->process_pixels_null(dimx, dimy);
+
+	for(int i = 0; i <= dimx; i ++){
+		auto id = get_id(i, dimy);
+		pixels->set_status(id, OUT);
+	}
+
+	for(int i = 0; i <= dimy; i ++){
+		auto id = get_id(dimx, i);
+		pixels->set_status(id, OUT);
+	}
+
 	
 }
 
@@ -411,7 +422,7 @@ void MyRaster::print(){
 	cout<<"out:"<< outpolys->num_polygons() << endl;
 	outpolys->print();
 	cout << endl;
-	allpolys->print();
+	// allpolys->print();
 
 
 	delete borderpolys;
@@ -530,6 +541,14 @@ int MyRaster::get_x(int id){
 
 int MyRaster::get_y(int id){
 	return id / (dimx+1);
+}
+
+int MyRaster::get_pixel_id(Point &p){
+	int xoff = get_offset_x(p.x);
+	int yoff = get_offset_y(p.y);
+	assert(xoff <= dimx);
+	assert(yoff <= dimy);
+	return get_id(xoff, yoff);
 }
 
 MyRaster::~MyRaster(){

@@ -90,7 +90,7 @@ public:
 	int count_intersection_nodes(Point &p);
 	box get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
-	int get_pixel_id(Point &p){return get_id(get_offset_x(p.x), get_offset_y(p.y));}
+	int get_pixel_id(Point &p);
 	void process_crosses(map<int, vector<cross_info>> edge_info);
 	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
 

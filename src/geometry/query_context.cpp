@@ -113,6 +113,11 @@ void query_context::merge_global(){
 	global_ctx->query_count += query_count;
 	global_ctx->refine_count += refine_count;
 
+	global_ctx->double_sumx += double_sumx;
+	global_ctx->double_sumy += double_sumy;
+	global_ctx->sumx += sumx;
+	global_ctx->sumy += sumy;
+
 
 	global_ctx->contain_check += contain_check;
 	global_ctx->object_checked += object_checked;
@@ -168,6 +173,11 @@ void query_context::print_stats(){
 	log("count-contain:\t%ld",this->contain_check.counter);
 	log("count-checked:\t%ld",object_checked.counter);
 	log("count-found:\t%ld",found);
+	
+	log("test-double-sum-x\t%lf", double_sumx);
+	log("test-double-sum-y\t%lf", double_sumy);
+	log("test-sum-x:\t%ld", sumx);
+	log("test-sum-y:\t%ld", sumy);
 
 	if(object_checked.counter>0){
 		if(refine_count)

@@ -124,6 +124,11 @@ public:
 	size_t query_count = 0;
 	size_t refine_count = 0;
 
+	double double_sumx = 0.0;
+	double double_sumy = 0.0;
+	long long int sumx = 0;
+	long long int sumy = 0;
+
 	execute_step object_checked;
 	execute_step node_check;
 	execute_step contain_check;
