@@ -14,6 +14,7 @@ public:
 	box(){}
 	box (double lowx, double lowy, double highx, double highy);
 	bool contain(Point &p);
+	bool contain(box &target);
 };
 
 enum PartitionStatus{

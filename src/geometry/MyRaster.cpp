@@ -565,6 +565,23 @@ MyRaster::~MyRaster(){
 	// delete pixels;
 }
 
+vector<int> MyRaster::retrieve_pixels(box *target){
+
+	vector<int> ret;
+	int start_x = get_offset_x(target->low[0]);
+	int start_y = get_offset_y(target->low[1]);
+	int end_x = get_offset_x(target->high[0]);
+	int end_y = get_offset_y(target->high[1]);
+
+	//log("%d %d %d %d %d %d",dimx,dimy,start_x,end_x,start_y,end_y);
+	for(int i=start_x;i<=end_x;i++){
+		for(int j=start_y;j<=end_y;j++){
+			ret.push_back(get_id(i , j));
+		}
+	}
+	return ret;
+}
+
 
 void MyRaster::process_crosses(map<int, vector<cross_info>> edges_info){
 	int num_edge_seqs = 0;

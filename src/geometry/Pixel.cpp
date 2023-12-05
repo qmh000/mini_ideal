@@ -52,6 +52,27 @@
 // 	crosses.clear();
 // }
 
+box::box (double lowx, double lowy, double highx, double highy){
+	low[0] = lowx;
+	low[1] = lowy;
+	high[0] = highx;
+	high[1] = highy;
+}
+
+bool box::contain(Point &p){
+	return p.x>=low[0]&&
+		   p.x<=high[0]&&
+		   p.y>=low[1]&&
+		   p.y<=high[1];
+}
+
+bool box::contain(box &target){
+	return target.low[0]>=low[0]&&
+		   target.high[0]<=high[0]&&
+		   target.low[1]>=low[1]&&
+		   target.high[1]<=high[1];
+}
+
 Pixels::Pixels(int num_pixels){
 	status = new uint8_t[num_pixels / 4 + 1];
 	// status = new int[num_pixels];
@@ -66,13 +87,6 @@ Pixels::~Pixels(){
 
 void Pixels::add_edge_offset(int id, int idx){
 	pointer[id] = idx;
-}
-
-box::box (double lowx, double lowy, double highx, double highy){
-	low[0] = lowx;
-	low[1] = lowy;
-	high[0] = highx;
-	high[1] = highy;
 }
 
 void Pixels::set_status(int id, PartitionStatus state){
@@ -124,11 +138,4 @@ void Pixels::add_edge(int idx, int start, int end){
 void Pixels::init_edge_sequences(int num_edge_seqs){
 	len_edge_sequences = num_edge_seqs;
 	edge_sequences = new pair<uint16_t, uint8_t>[num_edge_seqs];
-}
-
-bool box::contain(Point &p){
-	return p.x>=low[0]&&
-		   p.x<=high[0]&&
-		   p.y>=low[1]&&
-		   p.y<=high[1];
 }

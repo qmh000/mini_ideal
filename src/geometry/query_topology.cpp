@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "../include/MyPolygon.h"
+#include "../include/geometry_computation.h"
 
 bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 
@@ -125,3 +126,123 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 	return false;
 }
 
+bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
+	if(!getMBB()->contain(*target->getMBB())){
+		//log("mbb do not contain");
+		return false;
+	}
+	ctx->object_checked.counter++;
+	struct timeval start = get_cur_time();
+
+	if(raster){
+		vector<int> pxs = raster->retrieve_pixels(target->getMBB());
+		auto pixs = raster->get_pixels();
+		int etn = 0;
+		int itn = 0;
+		vector<int> bpxs;
+		for(auto p : pxs){
+			if(pixs->show_status(p) == OUT){
+				etn++;
+			}else if(pixs->show_status(p) == IN){
+				itn++;
+			}else{
+				bpxs.push_back(p);
+			}
+		}
+		//log("%d %d %d",etn,itn,pxs.size());
+		if(etn == pxs.size()){
+			return false;
+		}
+		if(itn == pxs.size()){
+			return true;
+		}
+		ctx->border_checked.counter++;
+
+		start = get_cur_time();
+		if(target->raster){
+			vector<pair<int, int>> candidates;
+			vector<int> bpxs2;
+			start = get_cur_time();
+			for(auto p : bpxs){
+				bpxs2 = target->raster->retrieve_pixels(&raster->get_pixel_box(raster->get_x(p), raster->get_y(p)));
+				for(auto p2 : bpxs2){
+					ctx->pixel_evaluated.counter++;
+					// an external pixel of the container intersects an internal
+					// pixel of the containee, which means the containment must be false
+					if(pixs->show_status(p) == OUT && pixs->show_status(p2) == IN){
+						ctx->pixel_evaluated.execution_time += get_time_elapsed(start,true);
+						return false;
+					}
+					// evaluate the state
+					if(pixs->show_status(p) == BORDER && pixs->show_status(p2) == BORDER){
+						candidates.push_back(make_pair(p, p2));
+					}
+				}
+				bpxs2.clear();
+			}
+			ctx->pixel_evaluated.execution_time += get_time_elapsed(start,true);
+
+			for(auto pa : candidates){
+				auto p = pa.first;
+				auto p2 = pa.second;
+				ctx->border_evaluated.counter++;
+				// for(edge_range &r:p->edge_ranges){
+				// 	for(edge_range &r2:p2->edge_ranges){
+				// 		if(segment_intersect_batch(boundary->p+r.vstart, target->boundary->p+r2.vstart, r.size(), r2.size(), ctx->edge_checked.counter)){
+				// 			ctx->edge_checked.execution_time += get_time_elapsed(start,true);
+				// 			return false;
+				// 		}
+				// 	}
+				// }
+				for(int i = 0; i < raster->get_num_sequences(p); i ++){
+					auto r = pixs->edge_sequences[pixs->pointer[p] + i];
+					for(int j = 0; j <= raster->get_num_sequences(p2); j ++){
+						auto r2 = pixs->edge_sequences[pixs->pointer[p2] + j];
+						if(segment_intersect_batch(boundary->p+r.first, target->boundary->p+r2.first, r.second, r2.second, ctx->edge_checked.counter)){
+							ctx->edge_checked.execution_time += get_time_elapsed(start,true);
+							return false;
+						}
+					}
+				}
+				
+			}
+
+			ctx->edge_checked.execution_time += get_time_elapsed(start,true);
+		}
+		bpxs.clear();
+	}
+		// further filtering with the mbr of the target
+		Point mbb_vertices[5];
+		target->mbr->to_array(mbb_vertices);
+		// no intersection between this polygon and the mbr of the target polygon
+		if(!segment_intersect_batch(boundary->p, mbb_vertices, boundary->num_vertices, 5, ctx->edge_checked.counter)){
+			// the target must be the one which is contained (not contain) as its mbr is contained
+			if(contain(mbb_vertices[0], ctx)){
+				return true;
+			}
+		}
+
+		// when reach here, we have no choice but evaluate all edge pairs
+		ctx->border_checked.counter++;
+
+		// use the internal rtree if it is created
+		if(rtree){
+			for(int i=0;i<target->get_num_vertices();i++){
+				if(!contain_rtree(rtree, *target->get_point(i), ctx)){
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// otherwise, checking all the edges to make sure no intersection
+		if(segment_intersect_batch(boundary->p, target->boundary->p, boundary->num_vertices, target->boundary->num_vertices, ctx->edge_checked.counter)){
+			return false;
+		}
+	}
+
+	// this is the last step for all the cases, when no intersection segment is identified
+	// pick one point from the target and it must be contained by this polygon
+	Point p(target->getx(0),target->gety(0));
+	return contain(p, ctx,false);
+}

@@ -93,6 +93,7 @@ public:
 	int get_pixel_id(Point &p);
 	void process_crosses(map<int, vector<cross_info>> edge_info);
 	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
+	vector<int> retrieve_pixels(box *);
 
 	~MyRaster();
 };
@@ -115,6 +116,7 @@ public:
 	 * some query functions
 	 */
 	bool contain(Point &p, query_context *ctx, bool profile = true);
+	bool contain(MyPolygon *target, query_context *ctx);
 	/*
 	 * some utility functions
 	 */
