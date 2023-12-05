@@ -139,7 +139,6 @@ void MyRaster::evaluate_edges(){
 					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(x + 1, cur_starty)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(x, cur_starty), BORDER);
-					pixels->set_status(get_id(x + 1, cur_starty), BORDER);
 				}
 			}else { // right to left
 				for(int x=cur_startx;x>cur_endx;x--){
@@ -153,7 +152,6 @@ void MyRaster::evaluate_edges(){
 					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(x - 1, cur_starty)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(x, cur_starty), BORDER);
-					pixels->set_status(get_id(x - 1, cur_starty), BORDER);
 				}
 			}
 		}else if(x1==x2){
@@ -170,7 +168,6 @@ void MyRaster::evaluate_edges(){
 					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(cur_startx, y + 1)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(cur_startx, y), BORDER);
-					pixels->set_status(get_id(cur_startx, y + 1), BORDER);
 				}
 			}else { //border[bottom] down
 				for(int y=cur_starty;y>cur_endy;y--){
@@ -184,7 +181,6 @@ void MyRaster::evaluate_edges(){
 					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
 					edges_info[get_id(cur_startx, y - 1)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(cur_startx, y), BORDER);
-					pixels->set_status(get_id(cur_startx, y - 1), BORDER);
 				}
 			}
 		}else{
@@ -230,7 +226,6 @@ void MyRaster::evaluate_edges(){
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
-							pixels->set_status(get_id(x, y), BORDER);
 						}else{//right to left
 							// original
 							// pixels[x--][y]->leave(yval,LEFT,i);
@@ -242,7 +237,6 @@ void MyRaster::evaluate_edges(){
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
-							pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
 				}
@@ -274,8 +268,7 @@ void MyRaster::evaluate_edges(){
 
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x, y ++)].push_back(cross_info(LEAVE, i));
-							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));			
-							pixels->set_status(get_id(x, y), BORDER);				
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));				
 						}else{// top down
 							// original
 							// pixels[x][y--]->leave(xval, BOTTOM,i);
@@ -287,7 +280,6 @@ void MyRaster::evaluate_edges(){
 							pixels->set_status(get_id(x, y), BORDER);
 							edges_info[get_id(x, y --)].push_back(cross_info(LEAVE, i));
 							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
-							pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
 				}
@@ -326,10 +318,10 @@ void MyRaster::evaluate_edges(){
 		pixels->set_status(id, OUT);
 	}
 
-	for(int i = 0; i <= dimy; i ++){
-		auto id = get_id(dimx, i);
-		pixels->set_status(id, OUT);
-	}
+	// for(int i = 0; i <= dimy; i ++){
+	// 	auto id = get_id(dimx, i);
+	// 	pixels->set_status(id, OUT);
+	// }
 
 	
 }

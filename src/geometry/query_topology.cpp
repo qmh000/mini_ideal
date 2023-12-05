@@ -33,62 +33,62 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 			return false;
 		}
 
-		// start = get_cur_time();
-		// bool ret = false;
+		start = get_cur_time();
+		bool ret = false;
 
-		// // checking the intersection edges in the target pixel
-		// // uint edge_count = 0;
-		// // for(edge_range &rg:target->edge_ranges){
-		// // 	for(int i = rg.vstart; i <= rg.vend; i++) {
-		// // 		int j = i+1;
-		// // 		if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
-		// // 			double int_x = (boundary->p[j].x - boundary->p[i].x) * (p.y - boundary->p[i].y) / (boundary->p[j].y - boundary->p[i].y) + boundary->p[i].x;
-		// // 			if(p.x <= int_x && int_x <= target->high[0]){
-		// // 				ret = !ret;
-		// // 			}
-		// // 		}
-		// // 	}
-		// // 	edge_count += rg.size();
-		// // }
+		// checking the intersection edges in the target pixel
 		// uint edge_count = 0;
-        // for(uint16_t e = 0; e < raster->get_num_sequences(target); e ++){    
-        //     auto edge = pix->get_edge(pix->pointer[target] + e);
-        //     auto pos = edge.first;
-        //     for(int k = 0; k < edge.second; k ++){
-        //         int i = pos + k;
-        //         int j = i + 1;  //ATTENTION
-        //         if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
+		// for(edge_range &rg:target->edge_ranges){
+		// 	for(int i = rg.vstart; i <= rg.vend; i++) {
+		// 		int j = i+1;
+		// 		if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
 		// 			double int_x = (boundary->p[j].x - boundary->p[i].x) * (p.y - boundary->p[i].y) / (boundary->p[j].y - boundary->p[i].y) + boundary->p[i].x;
-		// 			if(p.x <= int_x && int_x <= raster->get_double_x(raster->get_x(target) + 1)){
+		// 			if(p.x <= int_x && int_x <= target->high[0]){
 		// 				ret = !ret;
 		// 			}
 		// 		}
-        //     }
-		// 	edge_count += edge.second;
-        // }
-		// if(profile){
-		// 	ctx->edge_checked.counter += edge_count;
-		// 	ctx->edge_checked.execution_time += get_time_elapsed(start);
+		// 	}
+		// 	edge_count += rg.size();
 		// }
+		uint edge_count = 0;
+        for(uint16_t e = 0; e < raster->get_num_sequences(target); e ++){    
+            auto edge = pix->get_edge(pix->pointer[target] + e);
+            auto pos = edge.first;
+            for(int k = 0; k < edge.second; k ++){
+                int i = pos + k;
+                int j = i + 1;  //ATTENTION
+                if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
+					double int_x = (boundary->p[j].x - boundary->p[i].x) * (p.y - boundary->p[i].y) / (boundary->p[j].y - boundary->p[i].y) + boundary->p[i].x;
+					if(p.x <= int_x && int_x <= raster->get_double_x(raster->get_x(target) + 1)){
+						ret = !ret;
+					}
+				}
+            }
+			edge_count += edge.second;
+        }
+		if(profile){
+			ctx->edge_checked.counter += edge_count;
+			ctx->edge_checked.execution_time += get_time_elapsed(start);
+		}
 
-		// // check the crossing nodes on the right bar
-		// // swap the state of ret if odd number of intersection
-		// // nodes encountered at the right side of the border
-		// struct timeval tstart = get_cur_time();
-		// int nc = raster->count_intersection_nodes(p);
-		// if(nc%2==1){
-		// 	ret = !ret;
-		// }
-		// if(profile){
-		// 	ctx->intersection_checked.counter += nc;
-		// 	ctx->intersection_checked.execution_time += get_time_elapsed(tstart);
+		// check the crossing nodes on the right bar
+		// swap the state of ret if odd number of intersection
+		// nodes encountered at the right side of the border
+		struct timeval tstart = get_cur_time();
+		int nc = raster->count_intersection_nodes(p);
+		if(nc%2==1){
+			ret = !ret;
+		}
+		if(profile){
+			ctx->intersection_checked.counter += nc;
+			ctx->intersection_checked.execution_time += get_time_elapsed(tstart);
 
-		// 	ctx->border_checked.counter++;
-		// 	ctx->border_checked.execution_time += get_time_elapsed(start);
-		// 	ctx->refine_count++;
-		// }
+			ctx->border_checked.counter++;
+			ctx->border_checked.execution_time += get_time_elapsed(start);
+			ctx->refine_count++;
+		}
 
-		// return ret;
+		return ret;
 	}
     // else{
 
@@ -164,7 +164,8 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 			vector<int> bpxs2;
 			start = get_cur_time();
 			for(auto p : bpxs){
-				bpxs2 = target->raster->retrieve_pixels(&raster->get_pixel_box(raster->get_x(p), raster->get_y(p)));
+				box bx =  raster->get_pixel_box(raster->get_x(p), raster->get_y(p));
+				bpxs2 = target->raster->retrieve_pixels(&bx);
 				for(auto p2 : bpxs2){
 					ctx->pixel_evaluated.counter++;
 					// an external pixel of the container intersects an internal
@@ -211,6 +212,7 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 		}
 		bpxs.clear();
 	}
+	/*
 		// further filtering with the mbr of the target
 		Point mbb_vertices[5];
 		target->mbr->to_array(mbb_vertices);
@@ -240,9 +242,10 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 			return false;
 		}
 	}
+	*/
 
 	// this is the last step for all the cases, when no intersection segment is identified
 	// pick one point from the target and it must be contained by this polygon
-	Point p(target->getx(0),target->gety(0));
-	return contain(p, ctx,false);
+	// Point p(target->getx(0),target->gety(0));
+	// return contain(p, ctx,false);
 }
