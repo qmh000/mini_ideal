@@ -73,6 +73,32 @@ bool box::contain(box &target){
 		   target.high[1]<=high[1];
 }
 
+double box::max_distance(Point &p, bool geography){
+
+	double dx = max(abs(p.x-low[0]), abs(p.x-high[0]));
+	double dy = max(abs(p.y-low[1]), abs(p.y-high[1]));
+
+	if(geography){
+		dy = dy/degree_per_kilometer_latitude;
+		dx = dx/degree_per_kilometer_longitude(p.y);
+	}
+	return sqrt(dx*dx+dy*dy);
+}
+
+// point to box
+double box::distance(Point &p, bool geography){
+	if(this->contain(p)){
+		return 0;
+	}
+	double dx = max(abs(p.x-(low[0]+high[0])/2) - (high[0]-low[0])/2, 0.0);
+	double dy = max(abs(p.y-(low[1]+high[1])/2) - (high[1]-low[1])/2, 0.0);
+	if(geography){
+		dy = dy/degree_per_kilometer_latitude;
+		dx = dx/degree_per_kilometer_longitude(p.y);
+	}
+	return sqrt(dx * dx + dy * dy);
+}
+
 Pixels::Pixels(int num_pixels){
 	status = new uint8_t[num_pixels / 4 + 1];
 	// status = new int[num_pixels];

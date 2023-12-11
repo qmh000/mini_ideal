@@ -164,8 +164,9 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 			vector<int> bpxs2;
 			start = get_cur_time();
 			for(auto p : bpxs){
-				box bx =  raster->get_pixel_box(raster->get_x(p), raster->get_y(p));
-				bpxs2 = target->raster->retrieve_pixels(&bx);
+				box *bx =  raster->get_pixel_box(raster->get_x(p), raster->get_y(p));
+				bpxs2 = target->raster->retrieve_pixels(bx);
+				delete bx;
 				for(auto p2 : bpxs2){
 					ctx->pixel_evaluated.counter++;
 					// an external pixel of the container intersects an internal

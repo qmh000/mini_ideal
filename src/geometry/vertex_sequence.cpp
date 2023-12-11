@@ -37,6 +37,10 @@ size_t VertexSequence::decode(char *source){
 	return decoded;
 }
 
+double VertexSequence::distance(Point &point, bool geography) {
+	return point_to_segment_sequence_distance(point, p, num_vertices, geography);
+}
+
 VertexSequence::~VertexSequence(){
 	if(p){
 		delete []p;

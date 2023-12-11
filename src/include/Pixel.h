@@ -3,6 +3,7 @@
 #include <float.h>
 
 #include "Point.h"
+#include "geometry_computation.h"
 
 #define BOX_GLOBAL_MIN 100000.0
 #define BOX_GLOBAL_MAX -100000.0
@@ -15,6 +16,8 @@ public:
 	box (double lowx, double lowy, double highx, double highy);
 	bool contain(Point &p);
 	bool contain(box &target);
+	double max_distance(Point &p, bool geography);
+	double distance(Point &p, bool geography);
 };
 
 enum PartitionStatus{

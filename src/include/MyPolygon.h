@@ -51,6 +51,7 @@ public:
 	size_t encode(char *dest);
 	size_t decode(char *source);
 	void print(bool complete_ring=false);
+	double distance(Point &p, bool geography = true);
 };
 
 class MyRaster{
@@ -88,12 +89,15 @@ public:
 	int get_x(int id);
 	int get_y(int id);
 	int count_intersection_nodes(Point &p);
-	box get_pixel_box(int x, int y);
+	box* get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
 	int get_pixel_id(Point &p);
 	void process_crosses(map<int, vector<cross_info>> edge_info);
 	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
 	vector<int> retrieve_pixels(box *);
+	vector<int> expand_radius(int lowx, int highx, int lowy, int highy, int step);
+	vector<int> expand_radius(int center, int step);
+	double get_possible_min(Point &p, int center, int step, bool geography = true);
 
 	~MyRaster();
 };
@@ -117,6 +121,7 @@ public:
 	 */
 	bool contain(Point &p, query_context *ctx, bool profile = true);
 	bool contain(MyPolygon *target, query_context *ctx);
+	double distance(Point &p, query_context *ctx, bool profile = true);
 	/*
 	 * some utility functions
 	 */
@@ -148,6 +153,10 @@ public:
 	
 	static MyPolygon *gen_box(double minx,double miny,double maxx,double maxy);
 	static MyPolygon *gen_box(box pix);
+	inline Point *get_point(int index){
+		assert(boundary&&index<boundary->num_vertices);
+		return &boundary->p[index];
+	}
 };
 
 class MyMultiPolygon{

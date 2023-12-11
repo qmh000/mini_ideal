@@ -44,4 +44,50 @@ inline bool segment_intersect_batch(Point *p1, Point *p2, int s1, int s2, size_t
 	return false;
 }
 
+inline double point_to_segment_distance(const Point &p, const Point &p1, const Point &p2, bool geography) {
+
+  double A = p.x - p1.x;
+  double B = p.y - p1.y;
+  double C = p2.x - p1.x;
+  double D = p2.y - p1.y;
+
+  double dot = A * C + B * D;
+  double len_sq = C * C + D * D;
+  double param = -1;
+  if (len_sq != 0) //in case of 0 length line
+      param = dot / len_sq;
+
+  double xx, yy;
+
+  if (param < 0) {
+    xx = p1.x;
+    yy = p1.y;
+  } else if (param > 1) {
+    xx = p2.x;
+    yy = p2.y;
+  } else {
+    xx = p1.x + param * C;
+    yy = p1.y + param * D;
+  }
+
+  double dx = p.x - xx;
+  double dy = p.y - yy;
+  if(geography){
+      dx = dx/degree_per_kilometer_longitude(p.y);
+      dy = dy/degree_per_kilometer_latitude;
+  }
+  return sqrt(dx * dx + dy * dy);
+}
+
+inline double point_to_segment_sequence_distance(Point &p, Point *vs, size_t seq_len, bool geography){
+    double mindist = DBL_MAX;
+    for (int i = 0; i < seq_len-1; i++) {
+        double dist = point_to_segment_distance(p, vs[i], vs[i+1], geography);
+        if(dist<mindist){
+            mindist = dist;
+        }
+    }
+    return mindist;
+}
+
 #endif /* SRC_GEOMETRY_GEOMETRY_COMPUTATION_H_ */
