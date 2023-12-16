@@ -108,8 +108,9 @@ void query_context::report_progress(int eval_batch){
 }
 
 void query_context::merge_global(){
-	lock();
+	global_ctx->lock();
 	global_ctx->found += found;
+	global_ctx->ideal_found += ideal_found;
 	global_ctx->query_count += query_count;
 	global_ctx->refine_count += refine_count;
 
@@ -137,7 +138,7 @@ void query_context::merge_global(){
 			global_ctx->latency[it.first] = lt;
 		}
 	}
-	unlock();
+	global_ctx->unlock();
 }
 
 bool query_context::next_batch(int batch_num){
@@ -173,6 +174,7 @@ void query_context::print_stats(){
 	log("count-contain:\t%ld",this->contain_check.counter);
 	log("count-checked:\t%ld",object_checked.counter);
 	log("count-found:\t%ld",found);
+	log("count-ideal_found:\t%ld",ideal_found);
 	
 	log("test-double-sum-x\t%lf", double_sumx);
 	log("test-double-sum-y\t%lf", double_sumy);

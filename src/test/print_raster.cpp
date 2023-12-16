@@ -5,25 +5,18 @@
 int main(){
 	query_context ctx;
 	vector<MyPolygon *> source = load_binary_file("/home/qmh/data/has_child.idl",ctx);
-	
+	int sum = 0;
 	for(int i = 0; i < source.size(); i ++){
 		auto p = source[i];
-		if(p->boundary->num_vertices<10000){
-			p->rasterization(100);
-			p->print();
-			p->get_rastor()->print();
-		}
+		p->rasterization(100);
+		// p->print();
+		// p->get_rastor()->print();
+		sum += p->get_rastor()->get_num_pixels(BORDER);
 	}
     cout << "rasterization finished!" << endl;
 
-	sleep(1000);
-	// MyPolygon *p0 = load_binary_file_single("/home/qmh/mini_ideal/src/has_child.idl",ctx1,0);
-	// p0->rasterization(100);
+	cout << sum << endl;
 	
-	// MyPolygon *p1 = load_binary_file_single("/home/qmh/mini_ideal/src/has_child.idl",ctx2,1);
-	// // p1->print();
-	// p1->rasterization(100);
-
 	// vector<MyPolygon *> source = load_binary_file("/home/qmh/mini_ideal/src/has_child.idl",ctx);
 	
 	// for(MyPolygon *p:source){

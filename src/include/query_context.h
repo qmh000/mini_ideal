@@ -121,6 +121,7 @@ public:
 
 	//query statistic
 	size_t found = 0;
+	size_t ideal_found = 0;
 	size_t query_count = 0;
 	size_t refine_count = 0;
 
@@ -172,6 +173,7 @@ public:
 	void reset_stats(){
 		//query statistic
 		found = 0;
+		ideal_found = 0;
 		query_count = 0;
 		refine_count = 0;
 		index = 0;

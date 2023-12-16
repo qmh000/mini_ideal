@@ -25,6 +25,7 @@ void MyPolygon::rasterization(int vpr){
 	if(raster==NULL){
 		raster = new MyRaster(boundary, vpr);
 		raster->rasterization();
+		raster->ideal_rasterization();
 	}
 	pthread_mutex_unlock(&ideal_partition_lock);
 }
@@ -133,4 +134,23 @@ void MyPolygon::clear(){
 	if(raster){
 		delete raster;
 	}
+}
+
+
+
+
+
+
+//original ideal
+void MyPolygon::ideal_rasterization(int vpr){
+	assert(vpr>0);
+	if(raster){
+		return;
+	}
+	pthread_mutex_lock(&ideal_partition_lock);
+	if(raster==NULL){
+		raster = new MyRaster(boundary,vpr);
+		raster->ideal_rasterization();
+	}
+	pthread_mutex_unlock(&ideal_partition_lock);
 }

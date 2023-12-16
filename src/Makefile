@@ -32,5 +32,8 @@ print_raster:	test/print_raster.o $(GEOMETRY_OBJS)
 test_distance:	test/test_distance.o $(GEOMETRY_OBJS)
 	$(CXX) -o ../build/$@ $^ $(LIBS) 
 
+debug_contain:	test/debug_contain.o $(GEOMETRY_OBJS)
+	$(CXX) -o ../build/$@ $^ $(LIBS) 
+
 clean:
 	rm -fr ../build/* $(OBJS) $(CU_OBJS)

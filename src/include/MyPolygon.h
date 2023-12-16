@@ -72,6 +72,10 @@ class MyRaster{
 	void init_pixels();
 	void evaluate_edges();
 	void scanline_reandering();
+
+
+	// original ideal
+	vector<vector<Pixel *>> ideal_pixels;
 public:
     MyRaster(VertexSequence *vs, int epp);
 	void rasterization();
@@ -88,18 +92,34 @@ public:
 	int get_id(int x, int y);
 	int get_x(int id);
 	int get_y(int id);
+	int get_x(long long id);
+	int get_y(long long id);
 	int count_intersection_nodes(Point &p);
 	box* get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
 	int get_pixel_id(Point &p);
-	void process_crosses(map<int, vector<cross_info>> edge_info);
-	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
+	void process_crosses(multimap<int, vector<cross_info>> edge_info);
+	void process_intersection(multimap<int, vector<double>> edge_intersection, string direction);
 	vector<int> retrieve_pixels(box *);
 	vector<int> expand_radius(int lowx, int highx, int lowy, int highy, int step);
 	vector<int> expand_radius(int center, int step);
 	double get_possible_min(Point &p, int center, int step, bool geography = true);
 
 	~MyRaster();
+
+
+
+
+
+
+	//original ideal
+	Pixel *get_pixel(Point &p);
+	int ideal_count_intersection_nodes(Point &p);
+	void ideal_rasterization();
+	void ideal_init_pixels();
+	void ideal_evaluate_edges();
+	void ideal_scanline_reandering();
+	void ideal_print();
 };
 
 class MyPolygon{
@@ -121,12 +141,13 @@ public:
 	 */
 	bool contain(Point &p, query_context *ctx, bool profile = true);
 	bool contain(MyPolygon *target, query_context *ctx);
+	bool ideal_contain(Point &p, query_context *ctx, bool profile = true);
 	double distance(Point &p, query_context *ctx, bool profile = true);
 	/*
 	 * some utility functions
 	 */
 	void print(bool print_id=true, bool print_hole=false);
-	void print_without_head(bool print_hole = false, bool complete_ring = false);
+	void print_without_head(bool print_hole = false, bool complete_ring = true);
 	/*
 	 * for filtering
 	 */
@@ -157,6 +178,11 @@ public:
 		assert(boundary&&index<boundary->num_vertices);
 		return &boundary->p[index];
 	}
+
+
+
+	//original ideal
+	void ideal_rasterization(int vpr);
 };
 
 class MyMultiPolygon{
@@ -183,6 +209,7 @@ public:
 
 // utility functions
 void preprocess(query_context *gctx);
+void ideal_process(query_context *gctx);
 
 // storage related functions
 vector<MyPolygon *> load_binary_file(const char *path, query_context &ctx);

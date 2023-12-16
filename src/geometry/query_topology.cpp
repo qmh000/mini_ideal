@@ -5,6 +5,79 @@
 #include "../include/MyPolygon.h"
 #include "../include/geometry_computation.h"
 
+// original
+bool MyPolygon::ideal_contain(Point &p, query_context *ctx, bool profile){
+
+	// the MBB may not be checked for within query
+	if(!mbr->contain(p)){
+		return false;
+	}
+	if(profile){
+		ctx->object_checked.counter++;
+	}
+
+	struct timeval start = get_cur_time();
+	// todo adjust the lower bound of pixel number when the raster model is usable
+	if(raster){
+		start = get_cur_time();
+		Pixel *target = raster->get_pixel(p);
+		if(profile){
+			ctx->pixel_evaluated.counter++;
+			ctx->pixel_evaluated.execution_time += get_time_elapsed(start);
+		}
+		if(target->status==IN){
+			return true;
+		}
+		if(target->status==OUT){
+			return false;
+		}
+
+		start = get_cur_time();
+		bool ret = false;
+
+		// checking the intersection edges in the target pixel
+		uint edge_count = 0;
+		for(edge_range &rg:target->edge_ranges){
+			for(int i = rg.vstart; i <= rg.vend; i++) {
+				int j = i+1;
+				if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
+					double int_x = (boundary->p[j].x - boundary->p[i].x) * (p.y - boundary->p[i].y) / (boundary->p[j].y - boundary->p[i].y) + boundary->p[i].x;
+					if(p.x <= int_x && int_x <= target->high[0]){
+						ret = !ret;
+					}
+				}
+			}
+			edge_count += rg.size();
+		}
+		cout << "ideal edge count: " << edge_count << endl;
+		if(profile){
+			ctx->edge_checked.counter += edge_count;
+			ctx->edge_checked.execution_time += get_time_elapsed(start);
+		}
+
+		// check the crossing nodes on the right bar
+		// swap the state of ret if odd number of intersection
+		// nodes encountered at the right side of the border
+		struct timeval tstart = get_cur_time();
+		int nc = raster->ideal_count_intersection_nodes(p);
+		if(nc%2==1){
+			ret = !ret;
+		}
+		if(profile){
+			ctx->intersection_checked.counter += nc;
+			ctx->intersection_checked.execution_time += get_time_elapsed(tstart);
+
+			ctx->border_checked.counter++;
+			ctx->border_checked.execution_time += get_time_elapsed(start);
+			ctx->refine_count++;
+		}
+
+		return ret;
+	}
+	return false;
+}
+
+
 bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 
 	// the MBB may not be checked for within query
@@ -17,11 +90,15 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
 
 	struct timeval start = get_cur_time();
 	// todo adjust the lower bound of pixel number when the raster model is usable
-	if(raster && get_num_pixels()>5){
+	// if(raster && get_num_pixels()>5){
+	if(raster){
 		start = get_cur_time();
         //Pixel *target = raster->get_pixel(p);
         int target = raster->get_pixel_id(p);
         auto pix = raster->get_pixels();
+		box* bx = raster->get_pixel_box(raster->get_x(target), raster->get_y(target));
+		double bx_high = bx->high[0];
+		delete bx;
 		if(profile){
 			ctx->pixel_evaluated.counter++;
 			ctx->pixel_evaluated.execution_time += get_time_elapsed(start);
@@ -59,13 +136,14 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
                 int j = i + 1;  //ATTENTION
                 if(((boundary->p[i].y >= p.y) != (boundary->p[j].y >= p.y))){
 					double int_x = (boundary->p[j].x - boundary->p[i].x) * (p.y - boundary->p[i].y) / (boundary->p[j].y - boundary->p[i].y) + boundary->p[i].x;
-					if(p.x <= int_x && int_x <= raster->get_double_x(raster->get_x(target) + 1)){
+					if(p.x <= int_x && int_x <= bx_high){
 						ret = !ret;
 					}
 				}
             }
 			edge_count += edge.second;
         }
+		cout << "edge count: " << edge_count << endl;
 		if(profile){
 			ctx->edge_checked.counter += edge_count;
 			ctx->edge_checked.execution_time += get_time_elapsed(start);
