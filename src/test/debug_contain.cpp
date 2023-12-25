@@ -15,6 +15,7 @@ bool MySearchCallback(MyPolygon *poly, void* arg){
 	// ctx->found += poly->contain(*(Point *)ctx->target, ctx);
 	// ctx->ideal_found += poly->ideal_contain(*(Point *)ctx->target, ctx);
 
+	
 	bool mycontain = poly->contain(*(Point *)ctx->target, ctx);
 	bool idealcontain = poly->ideal_contain(*(Point *)ctx->target, ctx);
 	cout << "mycontain " << mycontain << " idealcontain" << idealcontain << endl; 
@@ -76,6 +77,8 @@ int main(int argc, char** argv) {
 	global_ctx.source_polygons = load_binary_file(global_ctx.source_path.c_str(),global_ctx);
 
 	preprocess(&global_ctx);
+
+
 
 	timeval start = get_cur_time();
 	for(MyPolygon *p:global_ctx.source_polygons){

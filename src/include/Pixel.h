@@ -14,10 +14,13 @@ public:
 
 	box(){}
 	box (double lowx, double lowy, double highx, double highy);
+	bool intersect(box &target);
 	bool contain(Point &p);
 	bool contain(box &target);
 	double max_distance(Point &p, bool geography);
+	double max_distance(box &target, bool geography);
 	double distance(Point &p, bool geography);
+	double distance(box &t, bool geography);
 };
 
 enum PartitionStatus{
@@ -160,44 +163,44 @@ public:
 
 // original ideal
 
-class edge_range{
-public:
-	int vstart = 0;
-	int vend = 0;
-	edge_range(int s, int e){
-		vstart = s;
-		vend = e;
-	}
-	int size(){
-		return vend-vstart+1;
-	}
-};
+// class edge_range{
+// public:
+// 	int vstart = 0;
+// 	int vend = 0;
+// 	edge_range(int s, int e){
+// 		vstart = s;
+// 		vend = e;
+// 	}
+// 	int size(){
+// 		return vend-vstart+1;
+// 	}
+// };
 
-class Pixel:public box{
-	vector<cross_info> crosses;
+// class Pixel:public box{
+// 	vector<cross_info> crosses;
 
-public:
-	unsigned short id[2];
-	PartitionStatus status = OUT;
-	vector<edge_range> edge_ranges;
-	vector<double> intersection_nodes[4];
+// public:
+// 	unsigned short id[2];
+// 	PartitionStatus status = OUT;
+// 	vector<edge_range> edge_ranges;
+// 	vector<double> intersection_nodes[4];
 
-public:
-	bool is_boundary(){
-		return status == BORDER;
-	}
-	bool is_internal(){
-		return status == IN;
-	}
-	bool is_external(){
-		return status == OUT;
-	}
-	Pixel(){}
-	void enter(double val, Direction d, int vnum);
-	void leave(double val, Direction d, int vnum);
-	int num_edges_covered();
-	void ideal_process_crosses(int num_edges);
-};
+// public:
+// 	bool is_boundary(){
+// 		return status == BORDER;
+// 	}
+// 	bool is_internal(){
+// 		return status == IN;
+// 	}
+// 	bool is_external(){
+// 		return status == OUT;
+// 	}
+// 	Pixel(){}
+// 	void enter(double val, Direction d, int vnum);
+// 	void leave(double val, Direction d, int vnum);
+// 	int num_edges_covered();
+// 	void ideal_process_crosses(int num_edges);
+// };
 
 
 #endif /* SRC_GEOMETRY_PIXEL_H_ */

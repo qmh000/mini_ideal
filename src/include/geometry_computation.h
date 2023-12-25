@@ -90,4 +90,21 @@ inline double point_to_segment_sequence_distance(Point &p, Point *vs, size_t seq
     return mindist;
 }
 
+inline double segment_sequence_distance(Point *vs1, Point *vs2, size_t s1, size_t s2, bool geography){
+    double mindist = DBL_MAX;
+    for (int i = 0; i < s1; i++){
+        double dist = point_to_segment_sequence_distance(vs1[i], vs2, s2, geography);
+        if (dist < mindist){
+            mindist = dist;
+        }
+    }
+    for (int i = 0; i < s2; i++){
+      double dist = point_to_segment_sequence_distance(vs2[i], vs1, s1, geography);
+      if (dist < mindist){
+          mindist = dist;
+      }
+    }
+    return mindist;
+}
+
 #endif /* SRC_GEOMETRY_GEOMETRY_COMPUTATION_H_ */

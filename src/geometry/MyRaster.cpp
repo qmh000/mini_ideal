@@ -29,6 +29,20 @@ MyRaster::MyRaster(VertexSequence *vst, int epp){
 	}
 }
 
+MyRaster::~MyRaster(){
+	// original
+	// for(vector<Pixel *> &rows:pixels){
+	// 	for(Pixel *p:rows){
+	// 		delete p;
+	// 	}
+	// 	rows.clear();
+	// }
+	// pixels.clear();
+	
+	// modified
+	// delete pixels;
+}
+
 // original
 // void MyRaster::init_pixels(){
 // 	assert(mbr);
@@ -58,13 +72,15 @@ void MyRaster::init_pixels(){
 	// pixels->init_status((dimx+1)*(dimy+1));
 	horizontal.init_grid_lines(dimy + 1);
 	vertical.init_grid_lines(dimx + 1);
+	horizontal.offset[dimy] = horizontal.num_crosses;  
+    vertical.offset[dimx] = vertical.num_crosses;
 }
 
 void MyRaster::evaluate_edges(){
 	// modified(add)
-	multimap<int, vector<double>> horizontal_intersect_info;
-	multimap<int, vector<double>> vertical_intersect_info;
-	multimap<int, vector<cross_info>> edges_info;
+	map<int, vector<double>> horizontal_intersect_info;
+	map<int, vector<double>> vertical_intersect_info;
+	map<int, vector<cross_info>> edges_info;
 
 	// normalize
 	assert(mbr);
@@ -134,27 +150,9 @@ void MyRaster::evaluate_edges(){
 					// pixels[x+1][cur_starty]->enter(y1,LEFT,i);
 
 					// modified
-					if(!vertical_intersect_info.count(x + 1)){
-						vector<double> v;
-						v.push_back(y1);
-						vertical_intersect_info.insert({x + 1, v});
-					}else{
-						auto iter = vertical_intersect_info.find(x + 1);
-						iter.operator*().second.push_back(y1);
-					}
-
-					if(!edges_info.count(get_id(x, cur_starty))){
-						vector<cross_info> v;
-						v.push_back(cross_info(LEAVE, i));
-						edges_info.insert({get_id(x, cur_starty), v});
-					}else 
-						edges_info.find(get_id(x, cur_starty)).operator*().second.push_back(cross_info(LEAVE, i));
-					if(!edges_info.count(get_id(x + 1, cur_starty))){
-						vector<cross_info> v;
-						v.push_back(cross_info(ENTER, i));
-						edges_info.insert({get_id(x + 1, cur_starty), v});
-					}else 
-						edges_info.find(get_id(x + 1, cur_starty)).operator*().second.push_back(cross_info(ENTER, i));
+					vertical_intersect_info[x + 1].push_back(y1);
+					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(x + 1, cur_starty)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(x, cur_starty), BORDER);
 					pixels->set_status(get_id(x+1, cur_starty), BORDER);
 				}
@@ -165,27 +163,9 @@ void MyRaster::evaluate_edges(){
 					// pixels[x-1][cur_starty]->enter(y1, RIGHT,i);
 
 					// modified
-					if(!vertical_intersect_info.count(x)){
-						vector<double> v;
-						v.push_back(y1);
-						vertical_intersect_info.insert({x, v});
-					}else{
-						auto iter = vertical_intersect_info.find(x);
-						iter.operator*().second.push_back(y1);
-					}
-
-					if(!edges_info.count(get_id(x, cur_starty))){
-						vector<cross_info> v;
-						v.push_back(cross_info(LEAVE, i));
-						edges_info.insert({get_id(x, cur_starty), v});
-					}else 
-						edges_info.find(get_id(x, cur_starty)).operator*().second.push_back(cross_info(LEAVE, i));
-					if(!edges_info.count(get_id(x - 1, cur_starty))){
-						vector<cross_info> v;
-						v.push_back(cross_info(ENTER, i));
-						edges_info.insert({get_id(x - 1, cur_starty), v});
-					}else 
-						edges_info.find(get_id(x - 1, cur_starty)).operator*().second.push_back(cross_info(ENTER, i));
+					vertical_intersect_info[x].push_back(y1);
+					edges_info[get_id(x, cur_starty)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(x - 1, cur_starty)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(x, cur_starty), BORDER);
 					pixels->set_status(get_id(x-1, cur_starty), BORDER);
 				}
@@ -199,27 +179,9 @@ void MyRaster::evaluate_edges(){
 					// pixels[cur_startx][y+1]->enter(x1, BOTTOM,i);
 
 					// modified
-					if(!horizontal_intersect_info.count(y + 1)){
-						vector<double> v;
-						v.push_back(x1);
-						horizontal_intersect_info.insert({y + 1, v});
-					}else{
-						auto iter = horizontal_intersect_info.find(y + 1);
-						iter.operator*().second.push_back(x1);
-					}
-					if(!edges_info.count(get_id(cur_startx, y))){
-						vector<cross_info> v;
-						v.push_back(cross_info(LEAVE, i));
-						edges_info.insert({get_id(cur_startx, y), v});
-					}else 
-						edges_info.find(get_id(cur_startx, y)).operator*().second.push_back(cross_info(LEAVE, i));
-					if(!edges_info.count(get_id(cur_startx, y + 1))){
-						vector<cross_info> v;
-						v.push_back(cross_info(ENTER, i));
-						edges_info.insert({get_id(cur_startx, y + 1), v});
-					}else 
-						edges_info.find(get_id(cur_startx, y + 1)).operator*().second.push_back(cross_info(ENTER, i));
-
+					horizontal_intersect_info[y + 1].push_back(x1);
+					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(cur_startx, y + 1)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(cur_startx, y), BORDER);
 					pixels->set_status(get_id(cur_startx, y+1), BORDER);
 				}
@@ -230,28 +192,9 @@ void MyRaster::evaluate_edges(){
 					// pixels[cur_startx][y-1]->enter(x1, TOP,i);
 
 					// modified
-					if(!horizontal_intersect_info.count(y)){
-						vector<double> v;
-						v.push_back(x1);
-						horizontal_intersect_info.insert({y, v});
-					}else{
-						auto iter = horizontal_intersect_info.find(y);
-						iter.operator*().second.push_back(x1);
-					}
-
-					if(!edges_info.count(get_id(cur_startx, y))){
-						vector<cross_info> v;
-						v.push_back(cross_info(LEAVE, i));
-						edges_info.insert({get_id(cur_startx, y), v});
-					}else 
-						edges_info.find(get_id(cur_startx, y)).operator*().second.push_back(cross_info(LEAVE, i));
-					if(!edges_info.count(get_id(cur_startx, y - 1))){
-						vector<cross_info> v;
-						v.push_back(cross_info(ENTER, i));
-						edges_info.insert({get_id(cur_startx, y - 1), v});
-					}else 
-						edges_info.find(get_id(cur_startx, y - 1)).operator*().second.push_back(cross_info(ENTER, i));
-					
+					horizontal_intersect_info[y].push_back(x1);
+					edges_info[get_id(cur_startx, y)].push_back(cross_info(LEAVE, i));
+					edges_info[get_id(cur_startx, y - 1)].push_back(cross_info(ENTER, i));
 					pixels->set_status(get_id(cur_startx, y), BORDER);
 					pixels->set_status(get_id(cur_startx, y-1), BORDER);
 				}
@@ -294,29 +237,10 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,LEFT,i);
 
 							// modified
-							if(!vertical_intersect_info.count(x + 1)){
-								vector<double> v;
-								v.push_back(yval);
-								vertical_intersect_info.insert({x + 1, v});
-							}else{
-								auto iter = vertical_intersect_info.find(x + 1);
-								iter.operator*().second.push_back(yval);
-							}
-
+							vertical_intersect_info[x + 1].push_back(yval);
 							pixels->set_status(get_id(x, y), BORDER);
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(LEAVE, i));
-								edges_info.insert({get_id(x ++, y), v});
-							}else 
-								edges_info.find(get_id(x ++, y)).operator*().second.push_back(cross_info(LEAVE, i));
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(ENTER, i));
-								edges_info.insert({get_id(x, y), v});
-							}else 
-								edges_info.find(get_id(x, y)).operator*().second.push_back(cross_info(ENTER, i));
-							
+							edges_info[get_id(x ++, y)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 							pixels->set_status(get_id(x, y), BORDER);
 						}else{//right to left
 							// original
@@ -324,28 +248,10 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(yval,RIGHT,i);
 
 							// modified
-							if(!vertical_intersect_info.count(x)){
-								vector<double> v;
-								v.push_back(yval);
-								vertical_intersect_info.insert({x, v});
-							}else{
-								auto iter = vertical_intersect_info.find(x);
-								iter.operator*().second.push_back(yval);
-							}
-
+							vertical_intersect_info[x].push_back(yval);
 							pixels->set_status(get_id(x, y), BORDER);
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(LEAVE, i));
-								edges_info.insert({get_id(x --, y), v});
-							}else 
-								edges_info.find(get_id(x --, y)).operator*().second.push_back(cross_info(LEAVE, i));
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(ENTER, i));
-								edges_info.insert({get_id(x, y), v});
-							}else 
-								edges_info.find(get_id(x, y)).operator*().second.push_back(cross_info(ENTER, i));
+							edges_info[get_id(x --, y)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 							pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
@@ -374,29 +280,10 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(xval, BOTTOM,i);
 
 							// modified
-							if(!horizontal_intersect_info.count(y + 1)){
-								vector<double> v;
-								v.push_back(xval);
-								horizontal_intersect_info.insert({y + 1, v});
-							}else{
-								auto iter = horizontal_intersect_info.find(y + 1);
-								iter.operator*().second.push_back(xval);
-							}
-
+							horizontal_intersect_info[y + 1].push_back(xval);
 							pixels->set_status(get_id(x, y), BORDER);
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(LEAVE, i));
-								edges_info.insert({get_id(x, y ++), v});
-							}else 
-								edges_info.find(get_id(x, y ++)).operator*().second.push_back(cross_info(LEAVE, i));
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(ENTER, i));
-								edges_info.insert({get_id(x, y), v});
-							}else 
-								edges_info.find(get_id(x, y)).operator*().second.push_back(cross_info(ENTER, i));
-							
+							edges_info[get_id(x, y ++)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 							pixels->set_status(get_id(x, y), BORDER);				
 						}else{// top down
 							// original
@@ -404,29 +291,11 @@ void MyRaster::evaluate_edges(){
 							// pixels[x][y]->enter(xval, TOP,i);
 
 							// modified
-							if(!horizontal_intersect_info.count(y)){
-								vector<double> v;
-								v.push_back(xval);
-								horizontal_intersect_info.insert({y, v});
-							}else{
-								auto iter = horizontal_intersect_info.find(y);
-								iter.operator*().second.push_back(xval);
-							}
+							horizontal_intersect_info[y].push_back(xval);
 
 							pixels->set_status(get_id(x, y), BORDER);
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(LEAVE, i));
-								edges_info.insert({get_id(x, y --), v});
-							}else 
-								edges_info.find(get_id(x, y --)).operator*().second.push_back(cross_info(LEAVE, i));
-							if(!edges_info.count(get_id(x, y))){
-								vector<cross_info> v;
-								v.push_back(cross_info(ENTER, i));
-								edges_info.insert({get_id(x, y), v});
-							}else 
-								edges_info.find(get_id(x, y)).operator*().second.push_back(cross_info(ENTER, i));
-							
+							edges_info[get_id(x, y --)].push_back(cross_info(LEAVE, i));
+							edges_info[get_id(x, y)].push_back(cross_info(ENTER, i));
 							pixels->set_status(get_id(x, y), BORDER);
 						}
 					}
@@ -460,7 +329,6 @@ void MyRaster::evaluate_edges(){
 	process_intersection(horizontal_intersect_info, "horizontal");
 	process_intersection(vertical_intersect_info, "vertical");
 	pixels->process_pixels_null(dimx, dimy);
-
 	// for(int i = 0; i <= dimx; i ++){
 	// 	auto id = get_id(i, dimy);
 	// 	pixels->set_status(id, OUT);
@@ -499,6 +367,7 @@ void MyRaster::scanline_reandering(){
 
 	for(int y = 1; y < dimy; y ++){
 		bool isin = false;
+		uint16_t i = horizontal.offset[y], j = horizontal.offset[y + 1];
 		for(int x = 0; x < dimx; x ++){
 			if(pixels->show_status(get_id(x, y)) != BORDER){
 				if(isin){
@@ -509,13 +378,11 @@ void MyRaster::scanline_reandering(){
 				continue;
 			}
 			int pass = 0;
-			uint16_t i = horizontal.offset[y], j = horizontal.offset[y + 1];
 			while(i < j && horizontal.intersection_nodes[i] <= start_x + step_x * (x + 1)){
 				pass ++;
 				i ++;
 			}
-			if(pass % 2 == 1) isin = true;
-			else isin = false;
+			if(pass % 2 == 1) isin = !isin;
 
 		}
 	}
@@ -824,20 +691,6 @@ vector<int> MyRaster::expand_radius(int core_x_low, int core_x_high, int core_y_
 	return needprocess;
 }
 
-MyRaster::~MyRaster(){
-	// original
-	// for(vector<Pixel *> &rows:pixels){
-	// 	for(Pixel *p:rows){
-	// 		delete p;
-	// 	}
-	// 	rows.clear();
-	// }
-	// pixels.clear();
-	
-	// modified
-	// delete pixels;
-}
-
 vector<int> MyRaster::retrieve_pixels(box *target){
 
 	vector<int> ret;
@@ -855,8 +708,25 @@ vector<int> MyRaster::retrieve_pixels(box *target){
 	return ret;
 }
 
+vector<int> MyRaster::get_closest_pixels(box *target){
 
-void MyRaster::process_crosses(multimap<int, vector<cross_info>> edges_info){
+	// note that at 0 or dimx/dimy will be returned if
+	// the range of target is beyound this, as expected
+	int txstart = get_offset_x(target->low[0]);
+	int txend = get_offset_x(target->high[0]);
+	int tystart = get_offset_y(target->low[1]);
+	int tyend = get_offset_y(target->high[1]);
+	vector<int> ret;
+	for(int i=txstart;i<=txend;i++){
+		for(int j=tystart;j<=tyend;j++){
+			ret.push_back(get_id(i, j));
+		}
+	}
+	return ret;
+}
+
+
+void MyRaster::process_crosses(map<int, vector<cross_info>> edges_info){
 	int num_edge_seqs = 0;
 	// 可以写成lambda表达式
 	for(auto ei : edges_info){
@@ -865,6 +735,7 @@ void MyRaster::process_crosses(multimap<int, vector<cross_info>> edges_info){
 	pixels->init_edge_sequences(num_edge_seqs);
 
 	int idx = 0;
+	int edge_count = 0;
 	for(auto info : edges_info){
 		auto pix = info.first;
 		auto crosses = info.second; 
@@ -903,7 +774,7 @@ void MyRaster::process_crosses(multimap<int, vector<cross_info>> edges_info){
 	}
 }
 
-void MyRaster::process_intersection(multimap<int, vector<double>> intersection_info, string direction){
+void MyRaster::process_intersection(map<int, vector<double>> intersection_info, string direction){
 	int num_nodes = 0;
 	for(auto i : intersection_info){
 		num_nodes += i.second.size();
@@ -968,306 +839,306 @@ void MyRaster::process_intersection(multimap<int, vector<double>> intersection_i
 
 // original ideal
 
-Pixel *MyRaster::get_pixel(Point &p){
-	int xoff = get_offset_x(p.x);
-	int yoff = get_offset_y(p.y);
-	assert(xoff<=dimx);
-	assert(yoff<=dimy);
-	return ideal_pixels[xoff][yoff];
-}
+// Pixel *MyRaster::get_pixel(Point &p){
+// 	int xoff = get_offset_x(p.x);
+// 	int yoff = get_offset_y(p.y);
+// 	assert(xoff<=dimx);
+// 	assert(yoff<=dimy);
+// 	return ideal_pixels[xoff][yoff];
+// }
 
-int MyRaster::ideal_count_intersection_nodes(Point &p){
-	// here we assume the point inside one of the pixel
-	Pixel *pix = get_pixel(p);
-	assert(pix->status==BORDER);
-	int count = 0;
-	for(int i=0;i<=pix->id[1];i++){
-		for(double &node:ideal_pixels[pix->id[0]][i]->intersection_nodes[RIGHT]){
-			if(node<=p.y){
-				count++;
-			}
-		}
-	}
-	return count;
-}
-
-
-void MyRaster::ideal_init_pixels(){
-	assert(mbr);
-	const double start_x = mbr->low[0];
-	const double start_y = mbr->low[1];
-	for(double i=0;i<=dimx;i++){
-		vector<Pixel *> v;
-		for(double j=0;j<=dimy;j++){
-			Pixel *m = new Pixel();
-			m->id[0] = i;
-			m->id[1] = j;
-			m->low[0] = i*step_x+start_x;
-			m->high[0] = (i+1.0)*step_x+start_x;
-			m->low[1] = j*step_y+start_y;
-			m->high[1] = (j+1.0)*step_y+start_y;
-			v.push_back(m);
-		}
-		ideal_pixels.push_back(v);
-	};
-}
-
-void MyRaster::ideal_evaluate_edges(){
-	// normalize
-	assert(mbr);
-	const double start_x = mbr->low[0];
-	const double start_y = mbr->low[1];
-
-	for(int i=0;i<vs->num_vertices-1;i++){
-		double x1 = vs->p[i].x;
-		double y1 = vs->p[i].y;
-		double x2 = vs->p[i+1].x;
-		double y2 = vs->p[i+1].y;
-
-		int cur_startx = (x1-start_x)/step_x;
-		int cur_endx = (x2-start_x)/step_x;
-		int cur_starty = (y1-start_y)/step_y;
-		int cur_endy = (y2-start_y)/step_y;
-
-		if(cur_startx==dimx+1){
-			cur_startx--;
-		}
-		if(cur_endx==dimx+1){
-			cur_endx--;
-		}
-
-		int minx = min(cur_startx,cur_endx);
-		int maxx = max(cur_startx,cur_endx);
-
-		if(cur_starty==dimy+1){
-			cur_starty--;
-		}
-		if(cur_endy==dimy+1){
-			cur_endy--;
-		}
-		// todo should not happen for normal cases
-		if(cur_startx>dimx||cur_endx>dimx||cur_starty>dimy||cur_endy>dimy){
-			cout<<"xrange\t"<<cur_startx<<" "<<cur_endx<<endl;
-			cout<<"yrange\t"<<cur_starty<<" "<<cur_endy<<endl;
-			printf("xrange_val\t%f %f\n",(x1-start_x)/step_x, (x2-start_x)/step_x);
-			printf("yrange_val\t%f %f\n",(y1-start_y)/step_y, (y2-start_y)/step_y);
-			assert(false);
-		}
-		assert(cur_startx<=dimx);
-		assert(cur_endx<=dimx);
-		assert(cur_starty<=dimy);
-		assert(cur_endy<=dimy);
-
-		// pixels[cur_startx][cur_starty]->status = BORDER;
-		// pixels[cur_endx][cur_endy]->status = BORDER;
-
-		//in the same pixel
-		if(cur_startx==cur_endx&&cur_starty==cur_endy){
-			continue;
-		}
-
-		if(y1==y2){
-			//left to right
-			if(cur_startx<cur_endx){
-				for(int x=cur_startx;x<cur_endx;x++){
-					ideal_pixels[x][cur_starty]->leave(y1,RIGHT,i);
-					ideal_pixels[x+1][cur_starty]->enter(y1,LEFT,i);
-					ideal_pixels[x][cur_starty]->status = BORDER;
-					ideal_pixels[x+1][cur_starty]->status = BORDER;
-				}
-			}else { // right to left
-				for(int x=cur_startx;x>cur_endx;x--){
-					ideal_pixels[x][cur_starty]->leave(y1, LEFT,i);
-					ideal_pixels[x-1][cur_starty]->enter(y1, RIGHT,i);
-					ideal_pixels[x][cur_starty]->status = BORDER;
-					ideal_pixels[x-1][cur_starty]->status = BORDER;
-				}
-			}
-		}else if(x1==x2){
-			//bottom up
-			if(cur_starty<cur_endy){
-				for(int y=cur_starty;y<cur_endy;y++){
-					ideal_pixels[cur_startx][y]->leave(x1, TOP,i);
-					ideal_pixels[cur_startx][y+1]->enter(x1, BOTTOM,i);
-					ideal_pixels[cur_startx][y]->status = BORDER;
-					ideal_pixels[cur_startx][y+1]->status = BORDER;
-				}
-			}else { //border[bottom] down
-				for(int y=cur_starty;y>cur_endy;y--){
-					ideal_pixels[cur_startx][y]->leave(x1, BOTTOM,i);
-					ideal_pixels[cur_startx][y-1]->enter(x1, TOP,i);
-					ideal_pixels[cur_startx][y]->status = BORDER;
-					ideal_pixels[cur_startx][y-1]->status = BORDER;
-				}
-			}
-		}else{
-			// solve the line function
-			double a = (y1-y2)/(x1-x2);
-			double b = (x1*y2-x2*y1)/(x1-x2);
-
-			int x = cur_startx;
-			int y = cur_starty;
-			while(x!=cur_endx||y!=cur_endy){
-				bool passed = false;
-				double yval = 0;
-				double xval = 0;
-				int cur_x = 0;
-				int cur_y = 0;
-				//check horizontally
-				if(x!=cur_endx){
-					if(cur_startx<cur_endx){
-						xval = ((double)x+1)*step_x+start_x;
-					}else{
-						xval = (double)x*step_x+start_x;
-					}
-					yval = xval*a+b;
-					cur_y = (yval-start_y)/step_y;
-					//printf("y %f %d\n",(yval-start_y)/step_y,cur_y);
-					if(cur_y>max(cur_endy, cur_starty)){
-						cur_y=max(cur_endy, cur_starty);
-					}
-					if(cur_y<min(cur_endy, cur_starty)){
-						cur_y=min(cur_endy, cur_starty);
-					}
-					if(cur_y==y){
-						passed = true;
-						// left to right
-						if(cur_startx<cur_endx){
-							ideal_pixels[x][y]->status = BORDER;
-							ideal_pixels[x++][y]->leave(yval,RIGHT,i);
-							ideal_pixels[x][y]->enter(yval,LEFT,i);
-							ideal_pixels[x][y]->status = BORDER;
-						}else{//right to left
-							ideal_pixels[x][y]->status = BORDER;
-							ideal_pixels[x--][y]->leave(yval,LEFT,i);
-							ideal_pixels[x][y]->enter(yval,RIGHT,i);
-							ideal_pixels[x][y]->status = BORDER;
-						}
-					}
-				}
-				//check vertically
-				if(y!=cur_endy){
-					if(cur_starty<cur_endy){
-						yval = (y+1)*step_y+start_y;
-					}else{
-						yval = y*step_y+start_y;
-					}
-					xval = (yval-b)/a;
-					int cur_x = (xval-start_x)/step_x;
-					//printf("x %f %d\n",(xval-start_x)/step_x,cur_x);
-					if(cur_x>max(cur_endx, cur_startx)){
-						cur_x=max(cur_endx, cur_startx);
-					}
-					if(cur_x<min(cur_endx, cur_startx)){
-						cur_x=min(cur_endx, cur_startx);
-					}
-					if(cur_x==x){
-						passed = true;
-						if(cur_starty<cur_endy){// bottom up
-							ideal_pixels[x][y]->status = BORDER;
-							ideal_pixels[x][y++]->leave(xval, TOP,i);
-							ideal_pixels[x][y]->enter(xval, BOTTOM,i);
-							ideal_pixels[x][y]->status = BORDER;
-						}else{// top down
-							ideal_pixels[x][y]->status = BORDER;
-							ideal_pixels[x][y--]->leave(xval, BOTTOM,i);
-							ideal_pixels[x][y]->enter(xval, TOP,i);
-							ideal_pixels[x][y]->status = BORDER;
-						}
-					}
-				}
-				// for debugging, should never happen
-				if(!passed){
-					vs->print();
-					cout<<"dim\t"<<dimx<<" "<<dimy<<endl;
-					printf("val\t%f %f\n",(xval-start_x)/step_x, (yval-start_y)/step_y);
-					cout<<"curxy\t"<<x<<" "<<y<<endl;
-					cout<<"calxy\t"<<cur_x<<" "<<cur_y<<endl;
-					cout<<"xrange\t"<<cur_startx<<" "<<cur_endx<<endl;
-					cout<<"yrange\t"<<cur_starty<<" "<<cur_endy<<endl;
-					printf("xrange_val\t%f %f\n",(x1-start_x)/step_x, (x2-start_x)/step_x);
-					printf("yrange_val\t%f %f\n",(y1-start_y)/step_y, (y2-start_y)/step_y);
-				}
-				assert(passed);
-			}
-		}
-	}
-
-	// for(vector<Pixel *> &rows:pixels){
-	// 	for(Pixel *p:rows){
-	// 		for(int i=0;i<4;i++){
-	// 			if(p->intersection_nodes[i].size()>0){
-	// 				p->status = BORDER;
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	// }
+// int MyRaster::ideal_count_intersection_nodes(Point &p){
+// 	// here we assume the point inside one of the pixel
+// 	Pixel *pix = get_pixel(p);
+// 	assert(pix->status==BORDER);
+// 	int count = 0;
+// 	for(int i=0;i<=pix->id[1];i++){
+// 		for(double &node:ideal_pixels[pix->id[0]][i]->intersection_nodes[RIGHT]){
+// 			if(node<=p.y){
+// 				count++;
+// 			}
+// 		}
+// 	}
+// 	return count;
+// }
 
 
-	for(vector<Pixel *> &rows:ideal_pixels){
-		for(Pixel *pix:rows){
-			pix->ideal_process_crosses(vs->num_vertices);
-		}
-	}
-}
+// void MyRaster::ideal_init_pixels(){
+// 	assert(mbr);
+// 	const double start_x = mbr->low[0];
+// 	const double start_y = mbr->low[1];
+// 	for(double i=0;i<=dimx;i++){
+// 		vector<Pixel *> v;
+// 		for(double j=0;j<=dimy;j++){
+// 			Pixel *m = new Pixel();
+// 			m->id[0] = i;
+// 			m->id[1] = j;
+// 			m->low[0] = i*step_x+start_x;
+// 			m->high[0] = (i+1.0)*step_x+start_x;
+// 			m->low[1] = j*step_y+start_y;
+// 			m->high[1] = (j+1.0)*step_y+start_y;
+// 			v.push_back(m);
+// 		}
+// 		ideal_pixels.push_back(v);
+// 	};
+// }
 
-void MyRaster::ideal_scanline_reandering(){
-	for(int y=1;y<dimy;y++){
-		bool isin = false;
-		for(int x=0;x<dimx;x++){
-			if(ideal_pixels[x][y]->status!=BORDER){
-				if(isin){
-					ideal_pixels[x][y]->status = IN;
-				}
-				continue;
-			}
-			if(ideal_pixels[x][y]->intersection_nodes[BOTTOM].size()%2==1){
-				isin = !isin;
-			}
-		}
-	}
-}
+// void MyRaster::ideal_evaluate_edges(){
+// 	// normalize
+// 	assert(mbr);
+// 	const double start_x = mbr->low[0];
+// 	const double start_y = mbr->low[1];
 
-void MyRaster::ideal_rasterization(){
+// 	for(int i=0;i<vs->num_vertices-1;i++){
+// 		double x1 = vs->p[i].x;
+// 		double y1 = vs->p[i].y;
+// 		double x2 = vs->p[i+1].x;
+// 		double y2 = vs->p[i+1].y;
 
-	//1. create space for the pixels
-	ideal_init_pixels();
+// 		int cur_startx = (x1-start_x)/step_x;
+// 		int cur_endx = (x2-start_x)/step_x;
+// 		int cur_starty = (y1-start_y)/step_y;
+// 		int cur_endy = (y2-start_y)/step_y;
 
-	//2. edge crossing to identify BORDER pixels
-	ideal_evaluate_edges();
+// 		if(cur_startx==dimx+1){
+// 			cur_startx--;
+// 		}
+// 		if(cur_endx==dimx+1){
+// 			cur_endx--;
+// 		}
 
-	//3. determine the status of rest pixels with scanline rendering
-	ideal_scanline_reandering();
-}
+// 		int minx = min(cur_startx,cur_endx);
+// 		int maxx = max(cur_startx,cur_endx);
 
-void MyRaster::ideal_print(){
-	MyMultiPolygon *inpolys = new MyMultiPolygon();
-	MyMultiPolygon *borderpolys = new MyMultiPolygon();
-	MyMultiPolygon *outpolys = new MyMultiPolygon();
+// 		if(cur_starty==dimy+1){
+// 			cur_starty--;
+// 		}
+// 		if(cur_endy==dimy+1){
+// 			cur_endy--;
+// 		}
+// 		// todo should not happen for normal cases
+// 		if(cur_startx>dimx||cur_endx>dimx||cur_starty>dimy||cur_endy>dimy){
+// 			cout<<"xrange\t"<<cur_startx<<" "<<cur_endx<<endl;
+// 			cout<<"yrange\t"<<cur_starty<<" "<<cur_endy<<endl;
+// 			printf("xrange_val\t%f %f\n",(x1-start_x)/step_x, (x2-start_x)/step_x);
+// 			printf("yrange_val\t%f %f\n",(y1-start_y)/step_y, (y2-start_y)/step_y);
+// 			assert(false);
+// 		}
+// 		assert(cur_startx<=dimx);
+// 		assert(cur_endx<=dimx);
+// 		assert(cur_starty<=dimy);
+// 		assert(cur_endy<=dimy);
 
-	for(int i=0;i<=dimx;i++){
-		for(int j=0;j<=dimy;j++){
-			MyPolygon *m = MyPolygon::gen_box(*ideal_pixels[i][j]);
-			if(ideal_pixels[i][j]->status==BORDER){
-				borderpolys->insert_polygon(m);
-			}else if(ideal_pixels[i][j]->status==IN){
-				inpolys->insert_polygon(m);
-			}else if(ideal_pixels[i][j]->status==OUT){
-				outpolys->insert_polygon(m);
-			}
-		}
-	}
+// 		// pixels[cur_startx][cur_starty]->status = BORDER;
+// 		// pixels[cur_endx][cur_endy]->status = BORDER;
 
-	cout<<"border:"<<endl;
-	borderpolys->print();
-	cout<<"in:"<<endl;
-	inpolys->print();
-	cout<<"out:"<<endl;
-	outpolys->print();
+// 		//in the same pixel
+// 		if(cur_startx==cur_endx&&cur_starty==cur_endy){
+// 			continue;
+// 		}
+
+// 		if(y1==y2){
+// 			//left to right
+// 			if(cur_startx<cur_endx){
+// 				for(int x=cur_startx;x<cur_endx;x++){
+// 					ideal_pixels[x][cur_starty]->leave(y1,RIGHT,i);
+// 					ideal_pixels[x+1][cur_starty]->enter(y1,LEFT,i);
+// 					ideal_pixels[x][cur_starty]->status = BORDER;
+// 					ideal_pixels[x+1][cur_starty]->status = BORDER;
+// 				}
+// 			}else { // right to left
+// 				for(int x=cur_startx;x>cur_endx;x--){
+// 					ideal_pixels[x][cur_starty]->leave(y1, LEFT,i);
+// 					ideal_pixels[x-1][cur_starty]->enter(y1, RIGHT,i);
+// 					ideal_pixels[x][cur_starty]->status = BORDER;
+// 					ideal_pixels[x-1][cur_starty]->status = BORDER;
+// 				}
+// 			}
+// 		}else if(x1==x2){
+// 			//bottom up
+// 			if(cur_starty<cur_endy){
+// 				for(int y=cur_starty;y<cur_endy;y++){
+// 					ideal_pixels[cur_startx][y]->leave(x1, TOP,i);
+// 					ideal_pixels[cur_startx][y+1]->enter(x1, BOTTOM,i);
+// 					ideal_pixels[cur_startx][y]->status = BORDER;
+// 					ideal_pixels[cur_startx][y+1]->status = BORDER;
+// 				}
+// 			}else { //border[bottom] down
+// 				for(int y=cur_starty;y>cur_endy;y--){
+// 					ideal_pixels[cur_startx][y]->leave(x1, BOTTOM,i);
+// 					ideal_pixels[cur_startx][y-1]->enter(x1, TOP,i);
+// 					ideal_pixels[cur_startx][y]->status = BORDER;
+// 					ideal_pixels[cur_startx][y-1]->status = BORDER;
+// 				}
+// 			}
+// 		}else{
+// 			// solve the line function
+// 			double a = (y1-y2)/(x1-x2);
+// 			double b = (x1*y2-x2*y1)/(x1-x2);
+
+// 			int x = cur_startx;
+// 			int y = cur_starty;
+// 			while(x!=cur_endx||y!=cur_endy){
+// 				bool passed = false;
+// 				double yval = 0;
+// 				double xval = 0;
+// 				int cur_x = 0;
+// 				int cur_y = 0;
+// 				//check horizontally
+// 				if(x!=cur_endx){
+// 					if(cur_startx<cur_endx){
+// 						xval = ((double)x+1)*step_x+start_x;
+// 					}else{
+// 						xval = (double)x*step_x+start_x;
+// 					}
+// 					yval = xval*a+b;
+// 					cur_y = (yval-start_y)/step_y;
+// 					//printf("y %f %d\n",(yval-start_y)/step_y,cur_y);
+// 					if(cur_y>max(cur_endy, cur_starty)){
+// 						cur_y=max(cur_endy, cur_starty);
+// 					}
+// 					if(cur_y<min(cur_endy, cur_starty)){
+// 						cur_y=min(cur_endy, cur_starty);
+// 					}
+// 					if(cur_y==y){
+// 						passed = true;
+// 						// left to right
+// 						if(cur_startx<cur_endx){
+// 							ideal_pixels[x][y]->status = BORDER;
+// 							ideal_pixels[x++][y]->leave(yval,RIGHT,i);
+// 							ideal_pixels[x][y]->enter(yval,LEFT,i);
+// 							ideal_pixels[x][y]->status = BORDER;
+// 						}else{//right to left
+// 							ideal_pixels[x][y]->status = BORDER;
+// 							ideal_pixels[x--][y]->leave(yval,LEFT,i);
+// 							ideal_pixels[x][y]->enter(yval,RIGHT,i);
+// 							ideal_pixels[x][y]->status = BORDER;
+// 						}
+// 					}
+// 				}
+// 				//check vertically
+// 				if(y!=cur_endy){
+// 					if(cur_starty<cur_endy){
+// 						yval = (y+1)*step_y+start_y;
+// 					}else{
+// 						yval = y*step_y+start_y;
+// 					}
+// 					xval = (yval-b)/a;
+// 					int cur_x = (xval-start_x)/step_x;
+// 					//printf("x %f %d\n",(xval-start_x)/step_x,cur_x);
+// 					if(cur_x>max(cur_endx, cur_startx)){
+// 						cur_x=max(cur_endx, cur_startx);
+// 					}
+// 					if(cur_x<min(cur_endx, cur_startx)){
+// 						cur_x=min(cur_endx, cur_startx);
+// 					}
+// 					if(cur_x==x){
+// 						passed = true;
+// 						if(cur_starty<cur_endy){// bottom up
+// 							ideal_pixels[x][y]->status = BORDER;
+// 							ideal_pixels[x][y++]->leave(xval, TOP,i);
+// 							ideal_pixels[x][y]->enter(xval, BOTTOM,i);
+// 							ideal_pixels[x][y]->status = BORDER;
+// 						}else{// top down
+// 							ideal_pixels[x][y]->status = BORDER;
+// 							ideal_pixels[x][y--]->leave(xval, BOTTOM,i);
+// 							ideal_pixels[x][y]->enter(xval, TOP,i);
+// 							ideal_pixels[x][y]->status = BORDER;
+// 						}
+// 					}
+// 				}
+// 				// for debugging, should never happen
+// 				if(!passed){
+// 					vs->print();
+// 					cout<<"dim\t"<<dimx<<" "<<dimy<<endl;
+// 					printf("val\t%f %f\n",(xval-start_x)/step_x, (yval-start_y)/step_y);
+// 					cout<<"curxy\t"<<x<<" "<<y<<endl;
+// 					cout<<"calxy\t"<<cur_x<<" "<<cur_y<<endl;
+// 					cout<<"xrange\t"<<cur_startx<<" "<<cur_endx<<endl;
+// 					cout<<"yrange\t"<<cur_starty<<" "<<cur_endy<<endl;
+// 					printf("xrange_val\t%f %f\n",(x1-start_x)/step_x, (x2-start_x)/step_x);
+// 					printf("yrange_val\t%f %f\n",(y1-start_y)/step_y, (y2-start_y)/step_y);
+// 				}
+// 				assert(passed);
+// 			}
+// 		}
+// 	}
+
+// 	// for(vector<Pixel *> &rows:pixels){
+// 	// 	for(Pixel *p:rows){
+// 	// 		for(int i=0;i<4;i++){
+// 	// 			if(p->intersection_nodes[i].size()>0){
+// 	// 				p->status = BORDER;
+// 	// 				break;
+// 	// 			}
+// 	// 		}
+// 	// 	}
+// 	// }
 
 
-	delete borderpolys;
-	delete inpolys;
-	delete outpolys;
-}
+// 	for(vector<Pixel *> &rows:ideal_pixels){
+// 		for(Pixel *pix:rows){
+// 			pix->ideal_process_crosses(vs->num_vertices);
+// 		}
+// 	}
+// }
+
+// void MyRaster::ideal_scanline_reandering(){
+// 	for(int y=1;y<dimy;y++){
+// 		bool isin = false;
+// 		for(int x=0;x<dimx;x++){
+// 			if(ideal_pixels[x][y]->status!=BORDER){
+// 				if(isin){
+// 					ideal_pixels[x][y]->status = IN;
+// 				}
+// 				continue;
+// 			}
+// 			if(ideal_pixels[x][y]->intersection_nodes[BOTTOM].size()%2==1){
+// 				isin = !isin;
+// 			}
+// 		}
+// 	}
+// }
+
+// void MyRaster::ideal_rasterization(){
+
+// 	//1. create space for the pixels
+// 	ideal_init_pixels();
+
+// 	//2. edge crossing to identify BORDER pixels
+// 	ideal_evaluate_edges();
+
+// 	//3. determine the status of rest pixels with scanline rendering
+// 	ideal_scanline_reandering();
+// }
+
+// void MyRaster::ideal_print(){
+// 	MyMultiPolygon *inpolys = new MyMultiPolygon();
+// 	MyMultiPolygon *borderpolys = new MyMultiPolygon();
+// 	MyMultiPolygon *outpolys = new MyMultiPolygon();
+
+// 	for(int i=0;i<=dimx;i++){
+// 		for(int j=0;j<=dimy;j++){
+// 			MyPolygon *m = MyPolygon::gen_box(*ideal_pixels[i][j]);
+// 			if(ideal_pixels[i][j]->status==BORDER){
+// 				borderpolys->insert_polygon(m);
+// 			}else if(ideal_pixels[i][j]->status==IN){
+// 				inpolys->insert_polygon(m);
+// 			}else if(ideal_pixels[i][j]->status==OUT){
+// 				outpolys->insert_polygon(m);
+// 			}
+// 		}
+// 	}
+
+// 	cout<<"border:"<<endl;
+// 	borderpolys->print();
+// 	cout<<"in:"<<endl;
+// 	inpolys->print();
+// 	cout<<"out:"<<endl;
+// 	outpolys->print();
+
+
+// 	delete borderpolys;
+// 	delete inpolys;
+// 	delete outpolys;
+// }

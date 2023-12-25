@@ -75,7 +75,7 @@ class MyRaster{
 
 
 	// original ideal
-	vector<vector<Pixel *>> ideal_pixels;
+	// vector<vector<Pixel *>> ideal_pixels;
 public:
     MyRaster(VertexSequence *vs, int epp);
 	void rasterization();
@@ -98,13 +98,21 @@ public:
 	box* get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
 	int get_pixel_id(Point &p);
-	void process_crosses(multimap<int, vector<cross_info>> edge_info);
-	void process_intersection(multimap<int, vector<double>> edge_intersection, string direction);
+	void process_crosses(map<int, vector<cross_info>> edge_info);
+	void process_intersection(map<int, vector<double>> edge_intersection, string direction);
 	vector<int> retrieve_pixels(box *);
 	vector<int> expand_radius(int lowx, int highx, int lowy, int highy, int step);
 	vector<int> expand_radius(int center, int step);
 	double get_possible_min(Point &p, int center, int step, bool geography = true);
+	vector<int> get_closest_pixels(box *target);
 
+	inline double get_step(bool geography){
+		if(geography){
+			return min(step_x/degree_per_kilometer_longitude(mbr->low[1]), step_y/degree_per_kilometer_latitude);
+		}else{
+			return min(step_x, step_y);
+		}
+	}
 	~MyRaster();
 
 
@@ -113,13 +121,13 @@ public:
 
 
 	//original ideal
-	Pixel *get_pixel(Point &p);
-	int ideal_count_intersection_nodes(Point &p);
-	void ideal_rasterization();
-	void ideal_init_pixels();
-	void ideal_evaluate_edges();
-	void ideal_scanline_reandering();
-	void ideal_print();
+	// Pixel *get_pixel(Point &p);
+	// int ideal_count_intersection_nodes(Point &p);
+	// void ideal_rasterization();
+	// void ideal_init_pixels();
+	// void ideal_evaluate_edges();
+	// void ideal_scanline_reandering();
+	// void ideal_print();
 };
 
 class MyPolygon{
@@ -143,6 +151,8 @@ public:
 	bool contain(MyPolygon *target, query_context *ctx);
 	bool ideal_contain(Point &p, query_context *ctx, bool profile = true);
 	double distance(Point &p, query_context *ctx, bool profile = true);
+	double distance(MyPolygon *target, query_context *ctx);
+	double distance(MyPolygon *target, int pix, query_context *ctx, bool profile);
 	/*
 	 * some utility functions
 	 */
@@ -181,8 +191,16 @@ public:
 
 
 
+
+
+
+
+
+
+
+
 	//original ideal
-	void ideal_rasterization(int vpr);
+	// void ideal_rasterization(int vpr);
 };
 
 class MyMultiPolygon{
