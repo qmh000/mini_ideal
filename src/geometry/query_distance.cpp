@@ -137,6 +137,9 @@ double MyPolygon::distance(Point &p, query_context *ctx, bool profile){
 double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool profile){
 	assert(target->raster);
 	assert(raster);
+	auto r_pixs = raster->get_pixels();
+    auto t_pixs = target->raster->get_pixels();
+    assert(r_pixs->show_status(pix) == BORDER);
 	struct timeval start = get_cur_time();
 
     auto pix_x = raster->get_x(pix);
@@ -147,9 +150,6 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
 	double min_mbrdist = mbrdist;
 	int step = 0;
 	double step_size = target->raster->get_step(ctx->geography);
-	auto r_pixs = raster->get_pixels();
-    auto t_pixs = target->raster->get_pixels();
-    assert(r_pixs->show_status(pix) == BORDER);
 
 	// initialize the seed closest pixels
 	vector<int> needprocess = target->raster->get_closest_pixels(pix_box);
@@ -172,7 +172,7 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
 
 		// for later steps, expand the circle to involve more pixels
 		if(step>0){
-			needprocess = raster->expand_radius(lowx,highx,lowy,highy,step);
+			needprocess = target->raster->expand_radius(lowx,highx,lowy,highy,step);
 		}
 		ctx->pixel_evaluated.counter += needprocess.size();
 		ctx->pixel_evaluated.execution_time += get_time_elapsed(start, true);

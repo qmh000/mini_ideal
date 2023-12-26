@@ -143,7 +143,7 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
             }
 			edge_count += edges.second;
         }
-		cout << "edge count: " << edge_count << endl;
+
 		if(profile){
 			ctx->edge_checked.counter += edge_count;
 			ctx->edge_checked.execution_time += get_time_elapsed(start);

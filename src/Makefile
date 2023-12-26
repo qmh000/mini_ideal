@@ -32,10 +32,10 @@ contain:	query/contain.o $(GEOMETRY_OBJS)
 contain_polygon:	query/contain_polygon.o $(GEOMETRY_OBJS)
 	$(CXX) -o ../build/$@ $^ $(LIBS) 
 
-distance:	test/distance.o $(GEOMETRY_OBJS)
+distance:	query/distance.o $(GEOMETRY_OBJS)
 	$(CXX) -o ../build/$@ $^ $(LIBS) 
 
-distance_polygon:	test/distance_polygon.o $(GEOMETRY_OBJS)
+distance_polygon:	query/distance_polygon.o $(GEOMETRY_OBJS)
 	$(CXX) -o ../build/$@ $^ $(LIBS) 
 
 debug_contain:	test/debug_contain.o $(GEOMETRY_OBJS)

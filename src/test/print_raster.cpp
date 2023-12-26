@@ -4,7 +4,7 @@
 
 int main(){
 	query_context ctx;
-	vector<MyPolygon *> source = load_binary_file("/home/qmh/data/has_child.idl",ctx);
+	vector<MyPolygon *> source = load_binary_file("/home/qmh/data/all.target.idl",ctx);
 	int sum = 0;
 	for(int i = 0; i < source.size(); i ++){
 		auto p = source[i];

@@ -30,10 +30,11 @@ size_t VertexSequence::decode(char *source){
 	size_t decoded = 0;
 	num_vertices = ((size_t *)source)[0];
 	assert(num_vertices>0);
-	p = new Point[num_vertices];
+	p = new Point[num_vertices + 1];
 	decoded += sizeof(size_t);
 	memcpy((char *)p,source+decoded,num_vertices*sizeof(Point));
 	decoded += num_vertices*sizeof(Point);
+	p[num_vertices ++] = p[0];
 	return decoded;
 }
 
