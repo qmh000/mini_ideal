@@ -95,7 +95,7 @@ public:
 	int get_x(long long id);
 	int get_y(long long id);
 	int count_intersection_nodes(Point &p);
-	box* get_pixel_box(int x, int y);
+	box get_pixel_box(int x, int y);
 	Pixels* get_pixels(){return pixels;}
 	int get_pixel_id(Point &p);
 	void process_crosses(map<int, vector<cross_info>> edge_info);
@@ -104,7 +104,7 @@ public:
 	vector<int> expand_radius(int lowx, int highx, int lowy, int highy, int step);
 	vector<int> expand_radius(int center, int step);
 	double get_possible_min(Point &p, int center, int step, bool geography = true);
-	vector<int> get_closest_pixels(box *target);
+	vector<int> get_closest_pixels(box target);
 
 	inline double get_step(bool geography){
 		if(geography){

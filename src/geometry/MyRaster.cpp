@@ -408,9 +408,8 @@ void MyRaster::print(){
 
 	for(int i=0;i<=dimx;i++){
 		for(int j=0;j<=dimy;j++){
-			box* bx = get_pixel_box(i, j);
-			MyPolygon *m = MyPolygon::gen_box(*bx);
-			delete bx;
+			box bx = get_pixel_box(i, j);
+			MyPolygon *m = MyPolygon::gen_box(bx);
 			if(pixels->show_status(get_id(i, j)) == BORDER){
 				borderpolys->insert_polygon(m);
 			}else if(pixels->show_status(get_id(i, j)) == IN){
@@ -461,7 +460,7 @@ int MyRaster::count_intersection_nodes(Point &p){
 	return count;
 }
 
-box* MyRaster::get_pixel_box(int x, int y){
+box MyRaster::get_pixel_box(int x, int y){
 	const double start_x = mbr->low[0];
 	const double start_y = mbr->low[1];
 
@@ -470,8 +469,7 @@ box* MyRaster::get_pixel_box(int x, int y){
 	double highx = start_x + (x + 1) * step_x;
 	double highy = start_y + (y + 1) * step_y;
 
-	box* ret = new box(lowx, lowy, highx, highy);
-	return ret;
+	return box(lowx, lowy, highx, highy);
 }
 
 int MyRaster::get_offset_x(double xval){
@@ -589,9 +587,9 @@ double MyRaster::get_possible_min(Point &p, int center, int step, bool geography
 	double mindist = DBL_MAX;
 	//left scan
 	if(core_x_low-step>=0){
-		double x = get_pixel_box(core_x_low-step,ymin)->high[0];
-		double y1 = get_pixel_box(core_x_low-step,ymin)->low[1];
-		double y2 = get_pixel_box(core_x_low-step,ymax)->high[1];
+		double x = get_pixel_box(core_x_low-step,ymin).high[0];
+		double y1 = get_pixel_box(core_x_low-step,ymin).low[1];
+		double y2 = get_pixel_box(core_x_low-step,ymax).high[1];
 
 		Point p1 = Point(x, y1);
 		Point p2 = Point(x, y2);
@@ -600,9 +598,9 @@ double MyRaster::get_possible_min(Point &p, int center, int step, bool geography
 	}
 	//right scan
 	if(core_x_high+step<=dimx){
-		double x = get_pixel_box(core_x_high+step,ymin)->low[0];
-		double y1 = get_pixel_box(core_x_high+step,ymin)->low[1];
-		double y2 = get_pixel_box(core_x_high+step,ymax)->high[1];
+		double x = get_pixel_box(core_x_high+step,ymin).low[0];
+		double y1 = get_pixel_box(core_x_high+step,ymin).low[1];
+		double y2 = get_pixel_box(core_x_high+step,ymax).high[1];
 		Point p1 = Point(x, y1);
 		Point p2 = Point(x, y2);
 		double dist = point_to_segment_distance(p, p1, p2, geography);
@@ -615,9 +613,9 @@ double MyRaster::get_possible_min(Point &p, int center, int step, bool geography
 	int xmax = min(dimx,core_x_high+step-(core_x_high+step<=dimx));
 	//bottom scan
 	if(core_y_low-step>=0){
-		double y = get_pixel_box(xmin,core_y_low-step)->high[1];
-		double x1 = get_pixel_box(xmin,core_y_low-step)->low[0];
-		double x2 = get_pixel_box(xmax,core_y_low-step)->high[0];
+		double y = get_pixel_box(xmin,core_y_low-step).high[1];
+		double x1 = get_pixel_box(xmin,core_y_low-step).low[0];
+		double x2 = get_pixel_box(xmax,core_y_low-step).high[0];
 		Point p1 = Point(x1, y);
 		Point p2 = Point(x2, y);
 		double dist = point_to_segment_distance(p, p1, p2, geography);
@@ -625,9 +623,9 @@ double MyRaster::get_possible_min(Point &p, int center, int step, bool geography
 	}
 	//top scan
 	if(core_y_high+step<=dimy){
-		double y = get_pixel_box(xmin,core_y_low+step)->low[1];
-		double x1 = get_pixel_box(xmin,core_y_low+step)->low[0];
-		double x2 = get_pixel_box(xmax,core_y_low+step)->high[0];
+		double y = get_pixel_box(xmin,core_y_low+step).low[1];
+		double x1 = get_pixel_box(xmin,core_y_low+step).low[0];
+		double x2 = get_pixel_box(xmax,core_y_low+step).high[0];
 		Point p1 = Point(x1, y);
 		Point p2 = Point(x2, y);
 		double dist = point_to_segment_distance(p, p1, p2, geography);
@@ -708,14 +706,14 @@ vector<int> MyRaster::retrieve_pixels(box *target){
 	return ret;
 }
 
-vector<int> MyRaster::get_closest_pixels(box *target){
+vector<int> MyRaster::get_closest_pixels(box target){
 
 	// note that at 0 or dimx/dimy will be returned if
 	// the range of target is beyound this, as expected
-	int txstart = get_offset_x(target->low[0]);
-	int txend = get_offset_x(target->high[0]);
-	int tystart = get_offset_y(target->low[1]);
-	int tyend = get_offset_y(target->high[1]);
+	int txstart = get_offset_x(target.low[0]);
+	int txend = get_offset_x(target.high[0]);
+	int tystart = get_offset_y(target.low[1]);
+	int tyend = get_offset_y(target.high[1]);
 	vector<int> ret;
 	for(int i=txstart;i<=txend;i++){
 		for(int j=tystart;j<=tyend;j++){

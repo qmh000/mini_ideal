@@ -41,5 +41,8 @@ distance_polygon:	query/distance_polygon.o $(GEOMETRY_OBJS)
 debug_contain:	test/debug_contain.o $(GEOMETRY_OBJS)
 	$(CXX) -o ../build/$@ $^ $(LIBS) 
 
+debug_distance_polygon: test/debug_distance_polygon.o $(GEOMETRY_OBJS)
+	$(CXX) -o ../build/$@ $^ $(LIBS)
+
 clean:
 	rm -fr ../build/* $(OBJS) $(CU_OBJS)

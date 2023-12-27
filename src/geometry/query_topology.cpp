@@ -96,9 +96,8 @@ bool MyPolygon::contain(Point &p, query_context *ctx, bool profile){
         //Pixel *target = raster->get_pixel(p);
         int target = raster->get_pixel_id(p);
         auto pix = raster->get_pixels();
-		box* bx = raster->get_pixel_box(raster->get_x(target), raster->get_y(target));
-		double bx_high = bx->high[0];
-		delete bx;
+		box bx = raster->get_pixel_box(raster->get_x(target), raster->get_y(target));
+		double bx_high = bx.high[0];
 		if(profile){
 			ctx->pixel_evaluated.counter++;
 			ctx->pixel_evaluated.execution_time += get_time_elapsed(start);
@@ -240,8 +239,8 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 			vector<int> bpxs;
 			start = get_cur_time();
 			for(auto p : bpxs){
-				box *bx =  raster->get_pixel_box(raster->get_x(p), raster->get_y(p));
-				bpxs = target->raster->retrieve_pixels(bx);
+				box bx =  raster->get_pixel_box(raster->get_x(p), raster->get_y(p));
+				bpxs = target->raster->retrieve_pixels(&bx);
 				for(auto p2 : bpxs){
 					ctx->pixel_evaluated.counter++;
 					// an external pixel of the container intersects an internal
@@ -252,11 +251,11 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 					}
 					if (pixs->show_status(p) == IN && pixs->show_status(p2) == BORDER){
 						Point pix_border[5];
-						pix_border[0].x = bx->low[0]; pix_border[0].y = bx->low[1];
-						pix_border[1].x = bx->low[0]; pix_border[1].y = bx->high[1];
-						pix_border[2].x = bx->high[0]; pix_border[2].y = bx->high[1];
-						pix_border[3].x = bx->high[0]; pix_border[3].y = bx->low[1];
-						pix_border[4].x = bx->low[0]; pix_border[4].y = bx->low[1];
+						pix_border[0].x = bx.low[0]; pix_border[0].y = bx.low[1];
+						pix_border[1].x = bx.low[0]; pix_border[1].y = bx.high[1];
+						pix_border[2].x = bx.high[0]; pix_border[2].y = bx.high[1];
+						pix_border[3].x = bx.high[0]; pix_border[3].y = bx.low[1];
+						pix_border[4].x = bx.low[0]; pix_border[4].y = bx.low[1];
 						for (int e = 0; e < raster->get_num_sequences(p2); e++){
 							auto edges = pixs->get_edge(pixs->pointer[p2] + e);
 							auto pos = edges.first;
@@ -272,7 +271,6 @@ bool MyPolygon::contain(MyPolygon *target, query_context *ctx){
 						candidates.push_back(make_pair(p, p2));
 					}
 				}
-				delete bx;
 				bpxs.clear();
 			}
 			ctx->pixel_evaluated.execution_time += get_time_elapsed(start,true);

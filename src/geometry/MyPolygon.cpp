@@ -14,6 +14,10 @@ using namespace std;
 
 MyPolygon::~MyPolygon(){
 	// clear();
+	delete raster;
+	delete boundary;
+	delete mbr;
+
 }
 
 void MyPolygon::rasterization(int vpr){

@@ -158,9 +158,9 @@ Pixels::Pixels(int num_pixels){
 }
 
 Pixels::~Pixels(){
-	delete status;
-	delete pointer;
-	delete edge_sequences;
+	delete []status;
+	delete []pointer;
+	delete []edge_sequences;
 }
 
 void Pixels::add_edge_offset(int id, int idx){

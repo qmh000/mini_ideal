@@ -61,9 +61,9 @@ double MyPolygon::distance(Point &p, query_context *ctx, bool profile){
                     ctx->border_evaluated.execution_time += get_time_elapsed(start);
                 }
 
-                box* cur_box = raster->get_pixel_box(raster->get_x(cur), raster->get_y(cur)); 
-                double mbr_dist = cur_box->distance(p, ctx->geography);
-                delete cur_box;
+                box cur_box = raster->get_pixel_box(raster->get_x(cur), raster->get_y(cur)); 
+                double mbr_dist = cur_box.distance(p, ctx->geography);
+
                 // skip the pixels that is further than the current minimum
                 if(mbr_dist >= mindist){
                     continue;
@@ -145,8 +145,8 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
     auto pix_x = raster->get_x(pix);
     auto pix_y = raster->get_y(pix);
     auto pix_box = raster->get_pixel_box(pix_x, pix_y);
-	double mindist = target->getMBB()->max_distance(*pix_box, ctx->geography);
-	double mbrdist = target->getMBB()->distance(*pix_box, ctx->geography);
+	double mindist = target->getMBB()->max_distance(pix_box, ctx->geography);
+	double mbrdist = target->getMBB()->distance(pix_box, ctx->geography);
 	double min_mbrdist = mbrdist;
 	int step = 0;
 	double step_size = target->raster->get_step(ctx->geography);
@@ -194,7 +194,7 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
 			
             if(t_pixs->show_status(cur) == BORDER){
 				start = get_cur_time();
-				bool toofar = (target->raster->get_pixel_box(cur_x, cur_y)->distance(*pix_box,ctx->geography) >= mindist);
+				bool toofar = (target->raster->get_pixel_box(cur_x, cur_y).distance(pix_box,ctx->geography) >= mindist);
 				if(profile){
 					ctx->border_evaluated.counter++;
 					ctx->border_evaluated.execution_time += get_time_elapsed(start, true);
@@ -213,6 +213,7 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
 					auto pix_er = r_pixs->edge_sequences[r_pixs->pointer[pix] + i];
 					for(int j = 0; j < target->raster->get_num_sequences(cur); j ++){
 						auto cur_er = t_pixs->edge_sequences[t_pixs->pointer[cur] + j];
+						if(cur_er.second < 2 || pix_er.second < 2) continue;
 						double dist = segment_sequence_distance(target->boundary->p+cur_er.first, boundary->p+pix_er.first, cur_er.second, pix_er.second, ctx->geography);
 						if(profile){
 							ctx->edge_checked.counter += pix_er.second*cur_er.second;
@@ -261,7 +262,6 @@ double MyPolygon::distance(MyPolygon *target, int pix, query_context *ctx, bool 
 		}
 		step++;
 	}
-
 	return mindist;
 }
 
@@ -280,7 +280,7 @@ double MyPolygon::distance(MyPolygon *target, query_context *ctx){
         auto r_pixs = raster->get_pixels();
 		auto t_pixs = target->raster->get_pixels();
 
-		vector<int> needprocess = raster->get_closest_pixels(target->getMBB());
+		vector<int> needprocess = raster->get_closest_pixels(*(target->getMBB()));
 		assert(needprocess.size()>0);
 		unsigned short lowx = raster->get_x(needprocess[0]);
 		unsigned short highx = raster->get_x(needprocess[0]);
@@ -315,7 +315,7 @@ double MyPolygon::distance(MyPolygon *target, query_context *ctx){
 				// this pixel if it is too far from the target
                 auto cur_x = raster->get_x(cur);
                 auto cur_y = raster->get_y(cur);
-				if(r_pixs->show_status(cur) == BORDER && raster->get_pixel_box(cur_x, cur_y)->distance(*target->getMBB(),ctx->geography) < mindist){
+				if(r_pixs->show_status(cur) == BORDER && raster->get_pixel_box(cur_x, cur_y).distance(*target->getMBB(),ctx->geography) < mindist){
 					// the vector model need be checked.
 					// do a polygon--pixel distance calculation
 					double dist = distance(target, cur, ctx, true);

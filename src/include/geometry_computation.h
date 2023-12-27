@@ -81,7 +81,9 @@ inline double point_to_segment_distance(const Point &p, const Point &p1, const P
 
 inline double point_to_segment_sequence_distance(Point &p, Point *vs, size_t seq_len, bool geography){
     double mindist = DBL_MAX;
+    // cout << "seq_len" << seq_len << endl;
     for (int i = 0; i < seq_len-1; i++) {
+        assert((i + 1) < seq_len);
         double dist = point_to_segment_distance(p, vs[i], vs[i+1], geography);
         if(dist<mindist){
             mindist = dist;

@@ -43,7 +43,5 @@ double VertexSequence::distance(Point &point, bool geography) {
 }
 
 VertexSequence::~VertexSequence(){
-	if(p){
-		delete []p;
-	}
+	if(p) delete []p;
 }
